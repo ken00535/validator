@@ -1,10 +1,10 @@
 package validator
 
 import (
+	"encoding/json"
 	"errors"
 	"reflect"
 	"strconv"
-	"strings"
 )
 
 const (
@@ -15,6 +15,7 @@ const (
 	uint32Type  = "uint32"
 	float64Type = "float64"
 	boolType    = "bool"
+	objectType  = "object"
 )
 
 // Payload is payload of message, it will store some info of validator, so you have to
@@ -92,27 +93,39 @@ func (v *SanitizeType) Optional() *SanitizeType {
 	return v
 }
 
-// ToInt sanitize filed to int
+// ToInt sanitize field to int
 func (v *SanitizeType) ToInt() *SanitizeType {
 	v.toValue(intType)
 	return v
 }
 
-// ToUint32 sanitize filed to int
+// ToUint32 sanitize field to uint32
 func (v *SanitizeType) ToUint32() *SanitizeType {
 	v.toValue(uint32Type)
 	return v
 }
 
-// ToFloat64 sanitize filed to int
+// ToFloat64 sanitize field to float64
 func (v *SanitizeType) ToFloat64() *SanitizeType {
 	v.toValue(float64Type)
 	return v
 }
 
-// ToBool sanitize filed to int
+// ToBool sanitize field to bool
 func (v *SanitizeType) ToBool() *SanitizeType {
 	v.toValue(boolType)
+	return v
+}
+
+// ToObject sanitize field to struct
+func (v *SanitizeType) ToObject() *SanitizeType {
+	v.toValue(objectType)
+	return v
+}
+
+// ToString sanitize field to string
+func (v *SanitizeType) ToString() *SanitizeType {
+	v.toValue(objectType)
 	return v
 }
 
@@ -123,15 +136,17 @@ func (v *SanitizeType) toValue(dataType string) *SanitizeType {
 		var err error
 		switch dataType {
 		case intType:
-			valInstance, err = strconv.Atoi(strings.Trim(val, "\""))
+			valInstance, err = strconv.Atoi(val)
 		case uint32Type:
 			var uint32Instance uint64
-			uint32Instance, err = strconv.ParseUint(strings.Trim(val, "\""), 10, 32)
+			uint32Instance, err = strconv.ParseUint(val, 10, 32)
 			valInstance = uint32(uint32Instance)
 		case float64Type:
-			valInstance, err = strconv.ParseFloat(strings.Trim(val, "\""), 64)
+			valInstance, err = strconv.ParseFloat(val, 64)
 		case boolType:
-			valInstance, err = strconv.ParseBool(strings.Trim(val, "\""))
+			valInstance, err = strconv.ParseBool(val)
+		case objectType:
+			err = json.Unmarshal([]byte(val), &valInstance)
 		}
 		v.handleErrors(err)
 		v.assignToStruct(valInstance)

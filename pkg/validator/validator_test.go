@@ -28,12 +28,14 @@ func (m *message) GetParam(field string) (val string, exist bool) {
 }
 
 type person struct {
-	Name    string  `vld:"name"`
-	Gender  string  `vld:"gender"`
-	Age     int     `vld:"age"`
-	Score   int     `vld:"score"`
-	Weight  float64 `vld:"w"`
-	IsAlive bool    `vld:"alive"`
+	Name        string                 `vld:"name"`
+	Gender      string                 `vld:"gender"`
+	Age         int                    `vld:"age"`
+	Score       int                    `vld:"score"`
+	Weight      float64                `vld:"w"`
+	IsAlive     bool                   `vld:"alive"`
+	Description string                 `vld:"desc"`
+	Hand        map[string]interface{} `vld:"hand"`
 }
 
 func TestStruct(t *testing.T) {
@@ -72,6 +74,67 @@ func TestSanitizeFloat(t *testing.T) {
 	Assign(payload).Struct(&actual)
 	Sanitize(payload).Params("w").ToFloat64()
 	assert.Equal(t, expect, actual)
+}
+
+func TestSanitizeString(t *testing.T) {
+	payload := &message{msg: map[string]string{}}
+	payload.msg["desc"] = `"hello"`
+	expect := person{Description: "hello"}
+	actual := person{}
+	Assign(payload).Struct(&actual)
+	Sanitize(payload).Params("desc").ToString()
+	assert.Equal(t, expect, actual)
+}
+
+func TestSanitizeObject(t *testing.T) {
+	type testCase struct {
+		dataReq   *message
+		dataField string
+		want      person
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]string{
+				"hand": `{"finger": 5}`,
+			}},
+			dataField: "hand",
+			want:      person{Hand: map[string]interface{}{"finger": float64(5)}},
+		},
+		{
+			dataReq: &message{msg: map[string]string{
+				"hand": `{"finger": true}`,
+			}},
+			dataField: "hand",
+			want:      person{Hand: map[string]interface{}{"finger": true}},
+		},
+		{
+			dataReq: &message{msg: map[string]string{
+				"hand": `{"finger": "this is my finger"}`,
+			}},
+			dataField: "hand",
+			want:      person{Hand: map[string]interface{}{"finger": "this is my finger"}},
+		},
+		{
+			dataReq: &message{msg: map[string]string{
+				"hand": `{"finger": [1,2]}`,
+			}},
+			dataField: "hand",
+			want:      person{Hand: map[string]interface{}{"finger": []interface{}{float64(1), float64(2)}}},
+		},
+		{
+			dataReq: &message{msg: map[string]string{
+				"hand": `{"finger": null}`,
+			}},
+			dataField: "hand",
+			want:      person{Hand: map[string]interface{}{"finger": nil}},
+		},
+	}
+	for _, tc := range cases {
+		actual := person{}
+		Assign(tc.dataReq).Struct(&actual)
+		Sanitize(tc.dataReq).Params(tc.dataField).ToObject()
+		assert.Equal(t, tc.want, actual)
+	}
 }
 
 func TestValidateResult(t *testing.T) {
