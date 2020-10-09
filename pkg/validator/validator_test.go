@@ -27,6 +27,15 @@ func (m *message) GetParam(field string) (val string, exist bool) {
 	return v, ok
 }
 
+type leg struct {
+	Number int `json:"number"`
+}
+
+type house struct {
+	Size   int `json:"size"`
+	Window int `json:"win"`
+}
+
 type person struct {
 	Name        string                 `vld:"name"`
 	Gender      string                 `vld:"gender"`
@@ -36,6 +45,9 @@ type person struct {
 	IsAlive     bool                   `vld:"alive"`
 	Description string                 `vld:"desc"`
 	Hand        map[string]interface{} `vld:"hand"`
+	Leg         leg                    `vld:"leg"`
+	Parent      []string               `vld:"parent"`
+	Houses      []house                `vld:"houses"`
 }
 
 func TestStruct(t *testing.T) {
@@ -133,6 +145,59 @@ func TestSanitizeObject(t *testing.T) {
 		actual := person{}
 		Assign(tc.dataReq).Struct(&actual)
 		Sanitize(tc.dataReq).Params(tc.dataField).ToObject()
+		assert.Equal(t, tc.want, actual)
+	}
+}
+
+func TestSanitizeStruct(t *testing.T) {
+	type testCase struct {
+		dataReq   *message
+		dataField string
+		want      person
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]string{
+				"leg": `{"number": 2}`,
+			}},
+			dataField: "leg",
+			want:      person{Leg: leg{Number: 2}},
+		},
+	}
+	for _, tc := range cases {
+		actual := person{}
+		Assign(tc.dataReq).Struct(&actual)
+		Sanitize(tc.dataReq).Params(tc.dataField).ToStruct()
+		assert.Equal(t, tc.want, actual)
+	}
+}
+
+func TestSanitizeSlice(t *testing.T) {
+	type testCase struct {
+		dataReq   *message
+		dataField string
+		want      person
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]string{
+				"parent": `["Mary", "Peter"]`,
+			}},
+			dataField: "parent",
+			want:      person{Parent: []string{"Mary", "Peter"}},
+		},
+		{
+			dataReq: &message{msg: map[string]string{
+				"houses": `[{"size": 10, "win": 2}, {"size": 50, "win": 10}]`,
+			}},
+			dataField: "houses",
+			want:      person{Houses: []house{{Size: 10, Window: 2}, {Size: 50, Window: 10}}},
+		},
+	}
+	for _, tc := range cases {
+		actual := person{}
+		Assign(tc.dataReq).Struct(&actual)
+		Sanitize(tc.dataReq).Params(tc.dataField).ToStruct()
 		assert.Equal(t, tc.want, actual)
 	}
 }

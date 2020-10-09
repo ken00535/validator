@@ -8,9 +8,13 @@ import (
 )
 
 const (
-	contextKey  = "github.com/ken00535/validator"
-	abcenseKey  = "abcense"
-	errorsKey   = "errors"
+	contextKey = "github.com/ken00535/validator"
+	abcenseKey = "abcense"
+	errorsKey  = "errors"
+	structKey  = "struct"
+)
+
+const (
 	intType     = "int"
 	uint32Type  = "uint32"
 	float64Type = "float64"
@@ -46,7 +50,7 @@ func (v *AssignType) Struct(target interface{}) *AssignType {
 		v.content.SetCache(cache)
 	}
 	cache[contextKey] = make(map[string]interface{})
-	cache[contextKey].(map[string]interface{})["struct"] = target
+	cache[contextKey].(map[string]interface{})[structKey] = target
 	return v
 }
 
@@ -117,8 +121,14 @@ func (v *SanitizeType) ToBool() *SanitizeType {
 	return v
 }
 
-// ToObject sanitize field to struct
+// ToObject sanitize field to object
 func (v *SanitizeType) ToObject() *SanitizeType {
+	v.toValue(objectType)
+	return v
+}
+
+// ToStruct sanitize field to struct
+func (v *SanitizeType) ToStruct() *SanitizeType {
 	v.toValue(objectType)
 	return v
 }
@@ -129,27 +139,57 @@ func (v *SanitizeType) ToString() *SanitizeType {
 	return v
 }
 
+// func (v *SanitizeType) toValue(dataType string) *SanitizeType {
+// 	val, exist := v.handleAbsence()
+// 	if exist {
+// 		var valInstance interface{}
+// 		var err error
+// 		switch dataType {
+// 		case intType:
+// 			valInstance, err = strconv.Atoi(val)
+// 		case uint32Type:
+// 			var uint32Instance uint64
+// 			uint32Instance, err = strconv.ParseUint(val, 10, 32)
+// 			valInstance = uint32(uint32Instance)
+// 		case float64Type:
+// 			valInstance, err = strconv.ParseFloat(val, 64)
+// 		case boolType:
+// 			valInstance, err = strconv.ParseBool(val)
+// 		case objectType:
+// 			err = json.Unmarshal([]byte(val), &valInstance)
+// 		}
+// 		v.handleErrors(err)
+// 		v.assignToStruct(valInstance)
+// 	}
+// 	return v
+// }
+
 func (v *SanitizeType) toValue(dataType string) *SanitizeType {
 	val, exist := v.handleAbsence()
 	if exist {
 		var valInstance interface{}
+		var field = v.getField()
 		var err error
 		switch dataType {
 		case intType:
 			valInstance, err = strconv.Atoi(val)
+			field.Set(reflect.ValueOf(valInstance))
 		case uint32Type:
 			var uint32Instance uint64
 			uint32Instance, err = strconv.ParseUint(val, 10, 32)
 			valInstance = uint32(uint32Instance)
+			field.Set(reflect.ValueOf(valInstance))
 		case float64Type:
 			valInstance, err = strconv.ParseFloat(val, 64)
+			field.Set(reflect.ValueOf(valInstance))
 		case boolType:
 			valInstance, err = strconv.ParseBool(val)
+			field.Set(reflect.ValueOf(valInstance))
 		case objectType:
-			err = json.Unmarshal([]byte(val), &valInstance)
+			varAddr := field.Addr().Interface()
+			err = json.Unmarshal([]byte(val), varAddr)
 		}
 		v.handleErrors(err)
-		v.assignToStruct(valInstance)
 	}
 	return v
 }
@@ -186,16 +226,29 @@ func (v *SanitizeType) handleErrors(err error) {
 	}
 }
 
-func (v *SanitizeType) assignToStruct(val interface{}) {
+// func (v *SanitizeType) assignToStruct(val interface{}) {
+// 	cache := v.content.GetCache()
+// 	target := cache[contextKey].(map[string]interface{})["struct"]
+// 	targetValue := reflect.ValueOf(target).Elem()
+// 	targetType := reflect.TypeOf(target).Elem()
+// 	for i := 0; i < targetType.NumField(); i++ {
+// 		if targetType.Field(i).Tag.Get("vld") == v.param {
+// 			targetValue.Field(i).Set(reflect.ValueOf(val))
+// 		}
+// 	}
+// }
+
+func (v *SanitizeType) getField() reflect.Value {
 	cache := v.content.GetCache()
-	target := cache[contextKey].(map[string]interface{})["struct"]
+	target := cache[contextKey].(map[string]interface{})[structKey]
 	targetValue := reflect.ValueOf(target).Elem()
 	targetType := reflect.TypeOf(target).Elem()
 	for i := 0; i < targetType.NumField(); i++ {
 		if targetType.Field(i).Tag.Get("vld") == v.param {
-			targetValue.Field(i).Set(reflect.ValueOf(val))
+			return targetValue.Field(i)
 		}
 	}
+	return reflect.Value{}
 }
 
 // ValidateResult validate result of sanitize
