@@ -5,6 +5,7 @@ import (
 	"errors"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -59,6 +60,7 @@ type SanitizeType struct {
 	content  Payload
 	param    string
 	optional bool
+	cutset   string
 }
 
 // Sanitize return a sanitize type to following operations
@@ -94,6 +96,12 @@ func (v *SanitizeType) Params(param string) *SanitizeType {
 // Optional tag the field is optinal
 func (v *SanitizeType) Optional() *SanitizeType {
 	v.optional = true
+	return v
+}
+
+// Trim the unused part before assign
+func (v *SanitizeType) Trim(str string) *SanitizeType {
+	v.cutset = str
 	return v
 }
 
@@ -142,6 +150,9 @@ func (v *SanitizeType) ToString() *SanitizeType {
 func (v *SanitizeType) toValue(dataType string) *SanitizeType {
 	val, exist := v.handleAbsence()
 	if exist {
+		if v.cutset != "" {
+			val = strings.Trim(val, v.cutset)
+		}
 		var valInstance interface{}
 		var field = v.getField()
 		var err error

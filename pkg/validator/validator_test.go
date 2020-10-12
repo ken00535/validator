@@ -264,6 +264,16 @@ func TestValidateOptional(t *testing.T) {
 	}
 }
 
+func TestTrim(t *testing.T) {
+	payload := &message{msg: map[string]string{}}
+	payload.msg["age"] = "!!18"
+	expect := person{Age: 18}
+	actual := person{}
+	Assign(payload).Struct(&actual)
+	Sanitize(payload).Params("age").Trim("!").ToInt()
+	assert.Equal(t, expect, actual)
+}
+
 func TestAnalyze(t *testing.T) {
 	person := person{Name: "ken"}
 	expect := []string{"Name"}
