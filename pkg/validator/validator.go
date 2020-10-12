@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	contextKey = "github.com/ken00535/validator"
+	contextKey = "github.com/govalidator/validator"
 	abcenseKey = "abcense"
 	errorsKey  = "errors"
 	structKey  = "struct"
@@ -66,7 +66,7 @@ func Sanitize(payload Payload) *SanitizeType {
 	var errorList []error
 	cache := payload.GetCache()
 	if cache[contextKey].(map[string]interface{})[errorsKey] != nil {
-		errorList = cache[errorsKey].([]error)
+		errorList = cache[contextKey].(map[string]interface{})[errorsKey].([]error)
 	}
 	if errorList == nil {
 		errorList = []error{}
@@ -139,31 +139,6 @@ func (v *SanitizeType) ToString() *SanitizeType {
 	return v
 }
 
-// func (v *SanitizeType) toValue(dataType string) *SanitizeType {
-// 	val, exist := v.handleAbsence()
-// 	if exist {
-// 		var valInstance interface{}
-// 		var err error
-// 		switch dataType {
-// 		case intType:
-// 			valInstance, err = strconv.Atoi(val)
-// 		case uint32Type:
-// 			var uint32Instance uint64
-// 			uint32Instance, err = strconv.ParseUint(val, 10, 32)
-// 			valInstance = uint32(uint32Instance)
-// 		case float64Type:
-// 			valInstance, err = strconv.ParseFloat(val, 64)
-// 		case boolType:
-// 			valInstance, err = strconv.ParseBool(val)
-// 		case objectType:
-// 			err = json.Unmarshal([]byte(val), &valInstance)
-// 		}
-// 		v.handleErrors(err)
-// 		v.assignToStruct(valInstance)
-// 	}
-// 	return v
-// }
-
 func (v *SanitizeType) toValue(dataType string) *SanitizeType {
 	val, exist := v.handleAbsence()
 	if exist {
@@ -226,18 +201,6 @@ func (v *SanitizeType) handleErrors(err error) {
 	}
 }
 
-// func (v *SanitizeType) assignToStruct(val interface{}) {
-// 	cache := v.content.GetCache()
-// 	target := cache[contextKey].(map[string]interface{})["struct"]
-// 	targetValue := reflect.ValueOf(target).Elem()
-// 	targetType := reflect.TypeOf(target).Elem()
-// 	for i := 0; i < targetType.NumField(); i++ {
-// 		if targetType.Field(i).Tag.Get("vld") == v.param {
-// 			targetValue.Field(i).Set(reflect.ValueOf(val))
-// 		}
-// 	}
-// }
-
 func (v *SanitizeType) getField() reflect.Value {
 	cache := v.content.GetCache()
 	target := cache[contextKey].(map[string]interface{})[structKey]
@@ -285,4 +248,70 @@ func (v *AnalyzeType) Fields(tags []string) []string {
 		}
 	}
 	return fieldNames
+}
+
+// CheckType is type to sanitize
+type CheckType struct {
+	content  Payload
+	param    string
+	optional bool
+}
+
+// Check return a check type to following operations
+func Check(payload Payload) *CheckType {
+	cache := payload.GetCache()
+	if cache == nil {
+		cache = make(map[string]interface{})
+		payload.SetCache(cache)
+	}
+	if cache[contextKey] == nil {
+		cache[contextKey] = make(map[string]interface{})
+	}
+	var errorList []error
+	if cache[contextKey].(map[string]interface{})[errorsKey] != nil {
+		errorList = cache[contextKey].(map[string]interface{})[errorsKey].([]error)
+	}
+	if errorList == nil {
+		errorList = []error{}
+		cache[contextKey].(map[string]interface{})[errorsKey] = errorList
+	}
+	var absence []string
+	if cache[contextKey].(map[string]interface{})[abcenseKey] != nil {
+		absence = cache[contextKey].(map[string]interface{})[abcenseKey].([]string)
+	}
+	if absence == nil {
+		absence = []string{}
+		cache[contextKey].(map[string]interface{})[abcenseKey] = absence
+	}
+	return &CheckType{
+		content: payload,
+	}
+}
+
+// Params tag the param that will be sanitized
+func (v *CheckType) Params(param string) *CheckType {
+	v.param = param
+	return v
+}
+
+// IsExist check param is exist or not
+func (v *CheckType) IsExist() *CheckType {
+	v.handleAbsence()
+	return v
+}
+
+func (v *CheckType) handleAbsence() (string, bool) {
+	cache := v.content.GetCache()
+	errorList := cache[contextKey].(map[string]interface{})[errorsKey].([]error)
+	absenceList := cache[contextKey].(map[string]interface{})[abcenseKey].([]string)
+	val, exist := v.content.GetParam(v.param)
+	if !exist {
+		if !v.optional {
+			errorList = append(errorList, errors.New(v.param+" don't exist!"))
+			cache[contextKey].(map[string]interface{})[errorsKey] = errorList
+		}
+		absenceList = append(absenceList, v.param)
+		cache[contextKey].(map[string]interface{})[abcenseKey] = absenceList
+	}
+	return val, exist
 }
