@@ -2,7 +2,7 @@ package validator
 
 import (
 	"errors"
-	"strconv"
+	"reflect"
 )
 
 // CheckType is type to sanitize
@@ -79,20 +79,28 @@ func (v *CheckType) isType(dataType string) *CheckType {
 		var err error
 		switch dataType {
 		case intType:
-			_, err = strconv.Atoi(val)
+			if reflect.TypeOf(val).Kind() != reflect.Int {
+				err = errors.New("type is not int")
+			}
 		case uint32Type:
-			_, err = strconv.ParseUint(val, 10, 32)
+			if reflect.TypeOf(val).Kind() != reflect.Uint32 {
+				err = errors.New("type is not uint32")
+			}
 		case float64Type:
-			_, err = strconv.ParseFloat(val, 64)
+			if reflect.TypeOf(val).Kind() != reflect.Float64 {
+				err = errors.New("type is not float64")
+			}
 		case boolType:
-			_, err = strconv.ParseBool(val)
+			if reflect.TypeOf(val).Kind() != reflect.Bool {
+				err = errors.New("type is not bool")
+			}
 		}
 		v.handleErrors(err)
 	}
 	return v
 }
 
-func (v *CheckType) handleAbsence() (string, bool) {
+func (v *CheckType) handleAbsence() (interface{}, bool) {
 	return handleAbsence(v)
 }
 

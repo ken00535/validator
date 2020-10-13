@@ -132,7 +132,9 @@ func (v *SanitizeType) toValue(dataType string) *SanitizeType {
 }
 
 func (v *SanitizeType) handleAbsence() (string, bool) {
-	return handleAbsence(v)
+	val, exist := handleAbsence(v)
+	valStr, ok := val.(string)
+	return valStr, (exist && ok)
 }
 
 func (v *SanitizeType) handleErrors(err error) {

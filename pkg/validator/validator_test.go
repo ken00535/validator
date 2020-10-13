@@ -7,7 +7,7 @@ import (
 )
 
 type message struct {
-	msg   map[string]string
+	msg   map[string]interface{}
 	cache map[string]interface{}
 }
 
@@ -22,7 +22,7 @@ func (m *message) SetCache(input map[string]interface{}) {
 	m.cache = input
 }
 
-func (m *message) GetParam(field string) (val string, exist bool) {
+func (m *message) GetParam(field string) (val interface{}, exist bool) {
 	v, ok := m.msg[field]
 	return v, ok
 }
@@ -59,7 +59,7 @@ func TestStruct(t *testing.T) {
 }
 
 func TestSanitizeInt(t *testing.T) {
-	payload := &message{msg: map[string]string{}}
+	payload := &message{msg: map[string]interface{}{}}
 	payload.msg["age"] = "18"
 	expect := person{Age: 18}
 	actual := person{}
@@ -69,7 +69,7 @@ func TestSanitizeInt(t *testing.T) {
 }
 
 func TestSanitizeBool(t *testing.T) {
-	payload := &message{msg: map[string]string{}}
+	payload := &message{msg: map[string]interface{}{}}
 	payload.msg["alive"] = "true"
 	expect := person{IsAlive: true}
 	actual := person{}
@@ -79,7 +79,7 @@ func TestSanitizeBool(t *testing.T) {
 }
 
 func TestSanitizeFloat(t *testing.T) {
-	payload := &message{msg: map[string]string{}}
+	payload := &message{msg: map[string]interface{}{}}
 	payload.msg["w"] = "64.5"
 	expect := person{Weight: 64.5}
 	actual := person{}
@@ -89,7 +89,7 @@ func TestSanitizeFloat(t *testing.T) {
 }
 
 func TestSanitizeString(t *testing.T) {
-	payload := &message{msg: map[string]string{}}
+	payload := &message{msg: map[string]interface{}{}}
 	payload.msg["desc"] = `"hello"`
 	expect := person{Description: "hello"}
 	actual := person{}
@@ -106,35 +106,35 @@ func TestSanitizeObject(t *testing.T) {
 	}
 	cases := []testCase{
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"hand": `{"finger": 5}`,
 			}},
 			dataField: "hand",
 			want:      person{Hand: map[string]interface{}{"finger": float64(5)}},
 		},
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"hand": `{"finger": true}`,
 			}},
 			dataField: "hand",
 			want:      person{Hand: map[string]interface{}{"finger": true}},
 		},
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"hand": `{"finger": "this is my finger"}`,
 			}},
 			dataField: "hand",
 			want:      person{Hand: map[string]interface{}{"finger": "this is my finger"}},
 		},
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"hand": `{"finger": [1,2]}`,
 			}},
 			dataField: "hand",
 			want:      person{Hand: map[string]interface{}{"finger": []interface{}{float64(1), float64(2)}}},
 		},
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"hand": `{"finger": null}`,
 			}},
 			dataField: "hand",
@@ -157,7 +157,7 @@ func TestSanitizeStruct(t *testing.T) {
 	}
 	cases := []testCase{
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"leg": `{"number": 2}`,
 			}},
 			dataField: "leg",
@@ -180,14 +180,14 @@ func TestSanitizeSlice(t *testing.T) {
 	}
 	cases := []testCase{
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"parent": `["Mary", "Peter"]`,
 			}},
 			dataField: "parent",
 			want:      person{Parent: []string{"Mary", "Peter"}},
 		},
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"houses": `[{"size": 10, "win": 2}, {"size": 50, "win": 10}]`,
 			}},
 			dataField: "houses",
@@ -211,7 +211,7 @@ func TestValidateResult(t *testing.T) {
 	}
 	cases := []testCase{
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"age": "18",
 			}},
 			dataField:       "score",
@@ -219,7 +219,7 @@ func TestValidateResult(t *testing.T) {
 			wantFormatError: 1,
 		},
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"age": "18",
 			}},
 			dataField:       "age",
@@ -246,7 +246,7 @@ func TestValidateOptional(t *testing.T) {
 	}
 	cases := []testCase{
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"age": "18",
 			}},
 			dataField:       "score",
@@ -265,7 +265,7 @@ func TestValidateOptional(t *testing.T) {
 }
 
 func TestTrim(t *testing.T) {
-	payload := &message{msg: map[string]string{}}
+	payload := &message{msg: map[string]interface{}{}}
 	payload.msg["age"] = "!!18"
 	expect := person{Age: 18}
 	actual := person{}
@@ -283,7 +283,7 @@ func TestCheckExist(t *testing.T) {
 	}
 	cases := []testCase{
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"age": "18",
 			}},
 			dataField:       "score",
@@ -291,7 +291,7 @@ func TestCheckExist(t *testing.T) {
 			wantFormatError: 1,
 		},
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"age": "18",
 			}},
 			dataField:       "age",
@@ -316,7 +316,7 @@ func TestCheckInt(t *testing.T) {
 	}
 	cases := []testCase{
 		{
-			dataReq: &message{msg: map[string]string{
+			dataReq: &message{msg: map[string]interface{}{
 				"age": "18A",
 			}},
 			dataField:       "age",
@@ -324,8 +324,8 @@ func TestCheckInt(t *testing.T) {
 			wantFormatError: 1,
 		},
 		{
-			dataReq: &message{msg: map[string]string{
-				"age": "18",
+			dataReq: &message{msg: map[string]interface{}{
+				"age": 18,
 			}},
 			dataField:       "age",
 			wantAbsence:     0,
@@ -349,16 +349,16 @@ func TestCheckBool(t *testing.T) {
 	}
 	cases := []testCase{
 		{
-			dataReq: &message{msg: map[string]string{
-				"alive": "trueA",
+			dataReq: &message{msg: map[string]interface{}{
+				"alive": "true",
 			}},
 			dataField:       "alive",
 			wantAbsence:     0,
 			wantFormatError: 1,
 		},
 		{
-			dataReq: &message{msg: map[string]string{
-				"alive": "true",
+			dataReq: &message{msg: map[string]interface{}{
+				"alive": true,
 			}},
 			dataField:       "alive",
 			wantAbsence:     0,
@@ -382,16 +382,16 @@ func TestCheckFloat(t *testing.T) {
 	}
 	cases := []testCase{
 		{
-			dataReq: &message{msg: map[string]string{
-				"w": "67.1A",
+			dataReq: &message{msg: map[string]interface{}{
+				"w": "67.1",
 			}},
 			dataField:       "w",
 			wantAbsence:     0,
 			wantFormatError: 1,
 		},
 		{
-			dataReq: &message{msg: map[string]string{
-				"w": "67.1",
+			dataReq: &message{msg: map[string]interface{}{
+				"w": 67.1,
 			}},
 			dataField:       "w",
 			wantAbsence:     0,

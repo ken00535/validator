@@ -41,7 +41,7 @@ func (v *validatorBase) handleErrors(err error) {
 	}
 }
 
-func handleAbsence(v validatorInterface) (string, bool) {
+func handleAbsence(v validatorInterface) (interface{}, bool) {
 	cache := v.getPayload().GetCache()
 	errorList := cache[contextKey].(map[string]interface{})[errorsKey].([]error)
 	absenceList := cache[contextKey].(map[string]interface{})[abcenseKey].([]string)

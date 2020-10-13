@@ -24,7 +24,7 @@ const (
 type Payload interface {
 	GetCache() map[string]interface{}
 	SetCache(map[string]interface{})
-	GetParam(string) (val string, exist bool)
+	GetParam(string) (val interface{}, exist bool)
 }
 
 // AssignType is type to validate
