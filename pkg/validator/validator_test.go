@@ -274,6 +274,138 @@ func TestTrim(t *testing.T) {
 	assert.Equal(t, expect, actual)
 }
 
+func TestCheckExist(t *testing.T) {
+	type testCase struct {
+		dataReq         *message
+		dataField       string
+		wantAbsence     int
+		wantFormatError int
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]string{
+				"age": "18",
+			}},
+			dataField:       "score",
+			wantAbsence:     1,
+			wantFormatError: 1,
+		},
+		{
+			dataReq: &message{msg: map[string]string{
+				"age": "18",
+			}},
+			dataField:       "age",
+			wantAbsence:     0,
+			wantFormatError: 0,
+		},
+	}
+	for _, tc := range cases {
+		Check(tc.dataReq).Params(tc.dataField).IsExist()
+		formatErrs, absenceErrs := ValidateResult(tc.dataReq)
+		assert.Equal(t, tc.wantFormatError, len(formatErrs))
+		assert.Equal(t, tc.wantAbsence, len(absenceErrs))
+	}
+}
+
+func TestCheckInt(t *testing.T) {
+	type testCase struct {
+		dataReq         *message
+		dataField       string
+		wantAbsence     int
+		wantFormatError int
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]string{
+				"age": "18A",
+			}},
+			dataField:       "age",
+			wantAbsence:     0,
+			wantFormatError: 1,
+		},
+		{
+			dataReq: &message{msg: map[string]string{
+				"age": "18",
+			}},
+			dataField:       "age",
+			wantAbsence:     0,
+			wantFormatError: 0,
+		},
+	}
+	for _, tc := range cases {
+		Check(tc.dataReq).Params(tc.dataField).IsInt()
+		formatErrs, absenceErrs := ValidateResult(tc.dataReq)
+		assert.Equal(t, tc.wantFormatError, len(formatErrs))
+		assert.Equal(t, tc.wantAbsence, len(absenceErrs))
+	}
+}
+
+func TestCheckBool(t *testing.T) {
+	type testCase struct {
+		dataReq         *message
+		dataField       string
+		wantAbsence     int
+		wantFormatError int
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]string{
+				"alive": "trueA",
+			}},
+			dataField:       "alive",
+			wantAbsence:     0,
+			wantFormatError: 1,
+		},
+		{
+			dataReq: &message{msg: map[string]string{
+				"alive": "true",
+			}},
+			dataField:       "alive",
+			wantAbsence:     0,
+			wantFormatError: 0,
+		},
+	}
+	for _, tc := range cases {
+		Check(tc.dataReq).Params(tc.dataField).IsBool()
+		formatErrs, absenceErrs := ValidateResult(tc.dataReq)
+		assert.Equal(t, tc.wantFormatError, len(formatErrs))
+		assert.Equal(t, tc.wantAbsence, len(absenceErrs))
+	}
+}
+
+func TestCheckFloat(t *testing.T) {
+	type testCase struct {
+		dataReq         *message
+		dataField       string
+		wantAbsence     int
+		wantFormatError int
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]string{
+				"w": "67.1A",
+			}},
+			dataField:       "w",
+			wantAbsence:     0,
+			wantFormatError: 1,
+		},
+		{
+			dataReq: &message{msg: map[string]string{
+				"w": "67.1",
+			}},
+			dataField:       "w",
+			wantAbsence:     0,
+			wantFormatError: 0,
+		},
+	}
+	for _, tc := range cases {
+		Check(tc.dataReq).Params(tc.dataField).IsFloat()
+		formatErrs, absenceErrs := ValidateResult(tc.dataReq)
+		assert.Equal(t, tc.wantFormatError, len(formatErrs))
+		assert.Equal(t, tc.wantAbsence, len(absenceErrs))
+	}
+}
+
 func TestAnalyze(t *testing.T) {
 	person := person{Name: "ken"}
 	expect := []string{"Name"}
