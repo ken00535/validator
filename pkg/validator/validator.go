@@ -17,6 +17,7 @@ const (
 	float64Type = "float64"
 	boolType    = "bool"
 	objectType  = "object"
+	stringType  = "string"
 )
 
 // Payload is payload of message, it will store some info of validator, so you have to

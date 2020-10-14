@@ -58,6 +58,11 @@ func (v *CheckType) IsInt() *CheckType {
 	return v.isType(intType)
 }
 
+// IsString check param is string or not
+func (v *CheckType) IsString() *CheckType {
+	return v.isType(stringType)
+}
+
 // IsUint32 check param is uint32 or not
 func (v *CheckType) IsUint32() *CheckType {
 	return v.isType(uint32Type)
@@ -93,6 +98,10 @@ func (v *CheckType) isType(dataType string) *CheckType {
 		case boolType:
 			if reflect.TypeOf(val).Kind() != reflect.Bool {
 				err = errors.New("type is not bool")
+			}
+		case stringType:
+			if reflect.TypeOf(val).Kind() != reflect.String {
+				err = errors.New("type is not string")
 			}
 		}
 		v.handleErrors(err)
