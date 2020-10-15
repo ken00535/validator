@@ -57,6 +57,7 @@ func ValidateResult(payload Payload) (formatError []error, absence []string) {
 	cache := payload.GetCache()
 	errorList := cache[contextKey].(map[string]interface{})[errorsKey].([]error)
 	absenceList := cache[contextKey].(map[string]interface{})[abcenseKey].([]string)
+	cache[contextKey] = make(map[string]interface{})
 	return errorList, absenceList
 }
 
