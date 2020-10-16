@@ -62,3 +62,44 @@ validator.Sanitize(payload).Params("age").ToInt()
 fmt.Println(player.age)
 // -> 18
 ```
+
+## Error Handling
+
+```go
+type message struct {
+	msg   map[string]interface{}
+	cache map[string]interface{}
+}
+
+func (m *message) GetCache() map[string]interface{} {
+	if m.cache == nil {
+		m.cache = make(map[string]interface{})
+	}
+	return m.cache
+}
+
+func (m *message) SetCache(input map[string]interface{}) {
+	m.cache = input
+}
+
+func (m *message) GetParam(field string) (val interface{}, exist bool) {
+	v, ok := m.msg[field]
+	return v, ok
+}
+
+// ...
+
+dataReq := &message{msg: map[string]interface{}{
+	"age": "18",
+}}
+Check(dataReq).Params("score").IsExist()
+errs, absence := ValidateResult(tc.dataReq)
+if len(errs) > 0 {
+	if err, ok := errs[0].(validator.Error); ok {
+		if err.IsNotExist() {
+			// do something
+		}
+	}
+	return err
+}
+```

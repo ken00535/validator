@@ -274,6 +274,7 @@ func TestValidateOptional(t *testing.T) {
 		dataField       string
 		wantAbsence     int
 		wantFormatError int
+		wantIsExistErr  bool
 	}
 	cases := []testCase{
 		{
@@ -292,6 +293,9 @@ func TestValidateOptional(t *testing.T) {
 		formatErrs, absenceErrs := ValidateResult(tc.dataReq)
 		assert.Equal(t, tc.wantFormatError, len(formatErrs))
 		assert.Equal(t, tc.wantAbsence, len(absenceErrs))
+		if len(formatErrs) > 0 {
+			assert.Equal(t, tc.wantIsExistErr, formatErrs[0].(Error).IsNotExist())
+		}
 	}
 }
 
@@ -320,6 +324,7 @@ func TestCheckExist(t *testing.T) {
 			dataField:       "score",
 			wantAbsence:     1,
 			wantFormatError: 1,
+			wantIsExistErr:  true,
 		},
 		{
 			dataReq: &message{msg: map[string]interface{}{

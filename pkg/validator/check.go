@@ -1,7 +1,7 @@
 package validator
 
 import (
-	"errors"
+	"fmt"
 	"reflect"
 )
 
@@ -85,23 +85,38 @@ func (v *CheckType) isType(dataType string) *CheckType {
 		switch dataType {
 		case intType:
 			if reflect.TypeOf(val).Kind() != reflect.Int {
-				err = errors.New("type is not int")
+				err = Error{
+					message: "type is not int",
+					errno:   errWrongType,
+				}
 			}
 		case uint32Type:
 			if reflect.TypeOf(val).Kind() != reflect.Uint32 {
-				err = errors.New("type is not uint32")
+				err = Error{
+					message: "type is not uint32",
+					errno:   errWrongType,
+				}
 			}
 		case float64Type:
 			if reflect.TypeOf(val).Kind() != reflect.Float64 {
-				err = errors.New("type is not float64")
+				err = Error{
+					message: "type is not float64",
+					errno:   errWrongType,
+				}
 			}
 		case boolType:
 			if reflect.TypeOf(val).Kind() != reflect.Bool {
-				err = errors.New("type is not bool")
+				err = Error{
+					message: "type is not bool",
+					errno:   errWrongType,
+				}
 			}
 		case stringType:
 			if reflect.TypeOf(val).Kind() != reflect.String {
-				err = errors.New("type is not string")
+				err = Error{
+					message: "type is not string",
+					errno:   errWrongType,
+				}
 			}
 		}
 		v.handleErrors(err)
@@ -114,5 +129,8 @@ func (v *CheckType) handleAbsence() (interface{}, bool) {
 }
 
 func (v *CheckType) getAbsenceError() error {
-	return errors.New(v.param + " don't exist!")
+	return Error{
+		message: fmt.Sprintf(v.param + " don't exist!"),
+		errno:   errNotExist,
+	}
 }
