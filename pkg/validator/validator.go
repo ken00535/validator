@@ -12,12 +12,13 @@ const (
 )
 
 const (
-	intType     = "int"
-	uint32Type  = "uint32"
-	float64Type = "float64"
-	boolType    = "bool"
-	objectType  = "object"
-	stringType  = "string"
+	intType = iota
+	uint32Type
+	float64Type
+	boolType
+	objectType
+	stringType
+	bytesType
 )
 
 // Payload is payload of message, it will store some info of validator, so you have to

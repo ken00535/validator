@@ -78,7 +78,12 @@ func (v *CheckType) IsBool() *CheckType {
 	return v.isType(boolType)
 }
 
-func (v *CheckType) isType(dataType string) *CheckType {
+// IsBytes check param is bytes or not
+func (v *CheckType) IsBytes() *CheckType {
+	return v.isType(bytesType)
+}
+
+func (v *CheckType) isType(dataType int) *CheckType {
 	val, exist := v.handleAbsence()
 	if exist {
 		var err error
@@ -115,6 +120,14 @@ func (v *CheckType) isType(dataType string) *CheckType {
 			if reflect.TypeOf(val).Kind() != reflect.String {
 				err = Error{
 					message: "type is not string",
+					errno:   errWrongType,
+				}
+			}
+		case bytesType:
+			if reflect.TypeOf(val).Kind() != reflect.Slice ||
+				reflect.TypeOf(val).Elem().Kind() != reflect.Uint8 {
+				err = Error{
+					message: "type is not bytes",
 					errno:   errWrongType,
 				}
 			}

@@ -2,7 +2,7 @@ package validator
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -98,7 +98,7 @@ func (v *SanitizeType) ToString() *SanitizeType {
 	return v
 }
 
-func (v *SanitizeType) toValue(dataType string) *SanitizeType {
+func (v *SanitizeType) toValue(dataType int) *SanitizeType {
 	val, exist := v.handleAbsence()
 	if exist {
 		if v.cutset != "" {
@@ -167,5 +167,8 @@ func (v *SanitizeType) getField() reflect.Value {
 }
 
 func (v *SanitizeType) getAbsenceError() error {
-	return errors.New("lack of " + v.param)
+	return Error{
+		message: fmt.Sprintf(v.param + " don't exist!"),
+		errno:   errNotExist,
+	}
 }
