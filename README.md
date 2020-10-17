@@ -1,6 +1,11 @@
 # Validator
 
-Validator is a validate tool, it can help you to senitize message. From string to other type.
+Validator is a validate tool, it can help you
+
+- check message parameter's type
+- senitize message, from string to other type.
+
+It's useful when you have to receive third party messages, but you're not sure its type
 
 ## Install
 
@@ -37,7 +42,18 @@ func (m *message) GetParam(field string) (val string, exist bool) {
 }
 ```
 
-Then your struct that carry message should add `vld` to field tag
+### Check
+
+```go
+payload := &message{msg: map[string]string{}}
+payload.msg["age"] = "18"
+Check(payload).Params("score").IsFloat()
+errs, absence := ValidateResult(tc.dataReq)
+```
+
+### Sanitize
+
+For using sanitize, your struct that carry message should add `vld` to field tag
 
 ```go
 type person struct {
@@ -66,33 +82,9 @@ fmt.Println(player.age)
 ## Error Handling
 
 ```go
-type message struct {
-	msg   map[string]interface{}
-	cache map[string]interface{}
-}
-
-func (m *message) GetCache() map[string]interface{} {
-	if m.cache == nil {
-		m.cache = make(map[string]interface{})
-	}
-	return m.cache
-}
-
-func (m *message) SetCache(input map[string]interface{}) {
-	m.cache = input
-}
-
-func (m *message) GetParam(field string) (val interface{}, exist bool) {
-	v, ok := m.msg[field]
-	return v, ok
-}
-
-// ...
-
-dataReq := &message{msg: map[string]interface{}{
-	"age": "18",
-}}
-Check(dataReq).Params("score").IsExist()
+payload := &message{msg: map[string]string{}}
+payload.msg["age"] = "18"
+Check(payload).Params("score").IsFloat()
 errs, absence := ValidateResult(tc.dataReq)
 if len(errs) > 0 {
 	if err, ok := errs[0].(validator.Error); ok {
