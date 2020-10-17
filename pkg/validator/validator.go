@@ -13,7 +13,10 @@ const (
 
 const (
 	intType = iota
+	int32Type
+	int64Type
 	uint32Type
+	uint64Type
 	float64Type
 	boolType
 	objectType

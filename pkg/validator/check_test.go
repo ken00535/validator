@@ -77,6 +77,39 @@ func TestCheckInt(t *testing.T) {
 	}
 }
 
+func TestCheckInt32(t *testing.T) {
+	type testCase struct {
+		dataReq         *message
+		dataField       string
+		wantAbsence     int
+		wantFormatError int
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"age": "18A",
+			}},
+			dataField:       "age",
+			wantAbsence:     0,
+			wantFormatError: 1,
+		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"age": 18,
+			}},
+			dataField:       "age",
+			wantAbsence:     0,
+			wantFormatError: 0,
+		},
+	}
+	for _, tc := range cases {
+		Check(tc.dataReq).Params(tc.dataField).IsInt32()
+		formatErrs, absenceErrs := ValidateResult(tc.dataReq)
+		assert.Equal(t, tc.wantFormatError, len(formatErrs))
+		assert.Equal(t, tc.wantAbsence, len(absenceErrs))
+	}
+}
+
 func TestCheckBytes(t *testing.T) {
 	type testCase struct {
 		dataReq         *message

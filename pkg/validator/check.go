@@ -58,9 +58,24 @@ func (v *CheckType) IsInt() *CheckType {
 	return v.isType(intType)
 }
 
+// IsInt32 check param is int32 or not
+func (v *CheckType) IsInt32() *CheckType {
+	return v.isType(int32Type)
+}
+
+// IsInt64 check param is int64 or not
+func (v *CheckType) IsInt64() *CheckType {
+	return v.isType(int64Type)
+}
+
 // IsString check param is string or not
 func (v *CheckType) IsString() *CheckType {
 	return v.isType(stringType)
+}
+
+// IsUint64 check param is uint64 or not
+func (v *CheckType) IsUint64() *CheckType {
+	return v.isType(uint64Type)
 }
 
 // IsUint32 check param is uint32 or not
@@ -95,10 +110,31 @@ func (v *CheckType) isType(dataType int) *CheckType {
 					errno:   errWrongType,
 				}
 			}
+		case int32Type:
+			if reflect.TypeOf(val).Kind() != reflect.Int32 {
+				err = Error{
+					message: "type is not int32",
+					errno:   errWrongType,
+				}
+			}
+		case int64Type:
+			if reflect.TypeOf(val).Kind() != reflect.Int64 {
+				err = Error{
+					message: "type is not int64",
+					errno:   errWrongType,
+				}
+			}
 		case uint32Type:
 			if reflect.TypeOf(val).Kind() != reflect.Uint32 {
 				err = Error{
 					message: "type is not uint32",
+					errno:   errWrongType,
+				}
+			}
+		case uint64Type:
+			if reflect.TypeOf(val).Kind() != reflect.Uint64 {
+				err = Error{
+					message: "type is not uint64",
 					errno:   errWrongType,
 				}
 			}
