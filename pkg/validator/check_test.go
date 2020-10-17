@@ -95,7 +95,7 @@ func TestCheckInt32(t *testing.T) {
 		},
 		{
 			dataReq: &message{msg: map[string]interface{}{
-				"age": 18,
+				"age": int32(18),
 			}},
 			dataField:       "age",
 			wantAbsence:     0,
