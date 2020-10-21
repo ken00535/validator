@@ -87,10 +87,9 @@ payload.msg["age"] = "18"
 Check(payload).Params("score").IsFloat()
 errs, absence := ValidateResult(tc.dataReq)
 if len(errs) > 0 {
-	if err, ok := errs[0].(validator.Error); ok {
-		if err.IsNotExist() {
-			// do something
-		}
+	switch errs[0].(type) {
+	case (validator.NotExistError):
+		// do something
 	}
 	return err
 }

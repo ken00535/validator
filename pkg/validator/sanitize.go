@@ -2,6 +2,7 @@ package validator
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -111,7 +112,7 @@ func (v *SanitizeType) toValue(dataType int) *SanitizeType {
 			valInstance, err = strconv.Atoi(val)
 			field.Set(reflect.ValueOf(valInstance))
 			if err != nil {
-				err = newWrongTypeError("message is not int")
+				err = newWrongTypeError(fmt.Sprintf("message %v is not int", val))
 			}
 		case uint32Type:
 			var uint32Instance uint64
@@ -119,25 +120,25 @@ func (v *SanitizeType) toValue(dataType int) *SanitizeType {
 			valInstance = uint32(uint32Instance)
 			field.Set(reflect.ValueOf(valInstance))
 			if err != nil {
-				err = newWrongTypeError("message is not int32")
+				err = newWrongTypeError(fmt.Sprintf("message %v is not int32", val))
 			}
 		case float64Type:
 			valInstance, err = strconv.ParseFloat(val, 64)
 			field.Set(reflect.ValueOf(valInstance))
 			if err != nil {
-				err = newWrongTypeError("message is not float")
+				err = newWrongTypeError(fmt.Sprintf("message %v is not float", val))
 			}
 		case boolType:
 			valInstance, err = strconv.ParseBool(val)
 			field.Set(reflect.ValueOf(valInstance))
 			if err != nil {
-				err = newWrongTypeError("message is not bool")
+				err = newWrongTypeError(fmt.Sprintf("message %v is not bool", val))
 			}
 		case objectType:
 			varAddr := field.Addr().Interface()
 			err = json.Unmarshal([]byte(val), varAddr)
 			if err != nil {
-				err = newWrongTypeError("message is not json or string")
+				err = newWrongTypeError(fmt.Sprintf("message %v is not json or string", val))
 			}
 		}
 		v.handleErrors(err)
