@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"fmt"
 	"reflect"
 )
 
@@ -105,67 +104,40 @@ func (v *CheckType) isType(dataType int) *CheckType {
 		switch dataType {
 		case intType:
 			if reflect.TypeOf(val).Kind() != reflect.Int {
-				err = Error{
-					message: "type is not int",
-					errno:   errWrongType,
-				}
+				err = newWrongTypeError("type is not int")
 			}
 		case int32Type:
 			if reflect.TypeOf(val).Kind() != reflect.Int32 {
-				err = Error{
-					message: "type is not int32",
-					errno:   errWrongType,
-				}
+				err = newWrongTypeError("type is not int32")
 			}
 		case int64Type:
 			if reflect.TypeOf(val).Kind() != reflect.Int64 {
-				err = Error{
-					message: "type is not int64",
-					errno:   errWrongType,
-				}
+				err = newWrongTypeError("type is not int64")
 			}
 		case uint32Type:
 			if reflect.TypeOf(val).Kind() != reflect.Uint32 {
-				err = Error{
-					message: "type is not uint32",
-					errno:   errWrongType,
-				}
+				err = newWrongTypeError("type is not uint32")
 			}
 		case uint64Type:
 			if reflect.TypeOf(val).Kind() != reflect.Uint64 {
-				err = Error{
-					message: "type is not uint64",
-					errno:   errWrongType,
-				}
+				err = newWrongTypeError("type is not uint64")
 			}
 		case float64Type:
 			if reflect.TypeOf(val).Kind() != reflect.Float64 {
-				err = Error{
-					message: "type is not float64",
-					errno:   errWrongType,
-				}
+				err = newWrongTypeError("type is not float64")
 			}
 		case boolType:
 			if reflect.TypeOf(val).Kind() != reflect.Bool {
-				err = Error{
-					message: "type is not bool",
-					errno:   errWrongType,
-				}
+				err = newWrongTypeError("type is not bool")
 			}
 		case stringType:
 			if reflect.TypeOf(val).Kind() != reflect.String {
-				err = Error{
-					message: "type is not string",
-					errno:   errWrongType,
-				}
+				err = newWrongTypeError("type is not string")
 			}
 		case bytesType:
 			if reflect.TypeOf(val).Kind() != reflect.Slice ||
 				reflect.TypeOf(val).Elem().Kind() != reflect.Uint8 {
-				err = Error{
-					message: "type is not bytes",
-					errno:   errWrongType,
-				}
+				err = newWrongTypeError("type is not bytes")
 			}
 		}
 		v.handleErrors(err)
@@ -178,8 +150,5 @@ func (v *CheckType) handleAbsence() (interface{}, bool) {
 }
 
 func (v *CheckType) getAbsenceError() error {
-	return Error{
-		message: fmt.Sprintf(v.param + " don't exist!"),
-		errno:   errNotExist,
-	}
+	return newNotExistError(v.param + " don't exist!")
 }

@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -58,150 +59,6 @@ func TestStruct(t *testing.T) {
 	assert.Equal(t, expect, actual)
 }
 
-func TestSanitizeInt(t *testing.T) {
-	payload := &message{msg: map[string]interface{}{}}
-	payload.msg["age"] = "18"
-	expect := person{Age: 18}
-	actual := person{}
-	Assign(payload).Struct(&actual)
-	Sanitize(payload).Params("age").ToInt()
-	assert.Equal(t, expect, actual)
-}
-
-func TestSanitizeBool(t *testing.T) {
-	payload := &message{msg: map[string]interface{}{}}
-	payload.msg["alive"] = "true"
-	expect := person{IsAlive: true}
-	actual := person{}
-	Assign(payload).Struct(&actual)
-	Sanitize(payload).Params("alive").ToBool()
-	assert.Equal(t, expect, actual)
-}
-
-func TestSanitizeFloat(t *testing.T) {
-	payload := &message{msg: map[string]interface{}{}}
-	payload.msg["w"] = "64.5"
-	expect := person{Weight: 64.5}
-	actual := person{}
-	Assign(payload).Struct(&actual)
-	Sanitize(payload).Params("w").ToFloat64()
-	assert.Equal(t, expect, actual)
-}
-
-func TestSanitizeString(t *testing.T) {
-	payload := &message{msg: map[string]interface{}{}}
-	payload.msg["desc"] = `"hello"`
-	expect := person{Description: "hello"}
-	actual := person{}
-	Assign(payload).Struct(&actual)
-	Sanitize(payload).Params("desc").ToString()
-	assert.Equal(t, expect, actual)
-}
-
-func TestSanitizeObject(t *testing.T) {
-	type testCase struct {
-		dataReq   *message
-		dataField string
-		want      person
-	}
-	cases := []testCase{
-		{
-			dataReq: &message{msg: map[string]interface{}{
-				"hand": `{"finger": 5}`,
-			}},
-			dataField: "hand",
-			want:      person{Hand: map[string]interface{}{"finger": float64(5)}},
-		},
-		{
-			dataReq: &message{msg: map[string]interface{}{
-				"hand": `{"finger": true}`,
-			}},
-			dataField: "hand",
-			want:      person{Hand: map[string]interface{}{"finger": true}},
-		},
-		{
-			dataReq: &message{msg: map[string]interface{}{
-				"hand": `{"finger": "this is my finger"}`,
-			}},
-			dataField: "hand",
-			want:      person{Hand: map[string]interface{}{"finger": "this is my finger"}},
-		},
-		{
-			dataReq: &message{msg: map[string]interface{}{
-				"hand": `{"finger": [1,2]}`,
-			}},
-			dataField: "hand",
-			want:      person{Hand: map[string]interface{}{"finger": []interface{}{float64(1), float64(2)}}},
-		},
-		{
-			dataReq: &message{msg: map[string]interface{}{
-				"hand": `{"finger": null}`,
-			}},
-			dataField: "hand",
-			want:      person{Hand: map[string]interface{}{"finger": nil}},
-		},
-	}
-	for _, tc := range cases {
-		actual := person{}
-		Assign(tc.dataReq).Struct(&actual)
-		Sanitize(tc.dataReq).Params(tc.dataField).ToObject()
-		assert.Equal(t, tc.want, actual)
-	}
-}
-
-func TestSanitizeStruct(t *testing.T) {
-	type testCase struct {
-		dataReq   *message
-		dataField string
-		want      person
-	}
-	cases := []testCase{
-		{
-			dataReq: &message{msg: map[string]interface{}{
-				"leg": `{"number": 2}`,
-			}},
-			dataField: "leg",
-			want:      person{Leg: leg{Number: 2}},
-		},
-	}
-	for _, tc := range cases {
-		actual := person{}
-		Assign(tc.dataReq).Struct(&actual)
-		Sanitize(tc.dataReq).Params(tc.dataField).ToStruct()
-		assert.Equal(t, tc.want, actual)
-	}
-}
-
-func TestSanitizeSlice(t *testing.T) {
-	type testCase struct {
-		dataReq   *message
-		dataField string
-		want      person
-	}
-	cases := []testCase{
-		{
-			dataReq: &message{msg: map[string]interface{}{
-				"parent": `["Mary", "Peter"]`,
-			}},
-			dataField: "parent",
-			want:      person{Parent: []string{"Mary", "Peter"}},
-		},
-		{
-			dataReq: &message{msg: map[string]interface{}{
-				"houses": `[{"size": 10, "win": 2}, {"size": 50, "win": 10}]`,
-			}},
-			dataField: "houses",
-			want:      person{Houses: []house{{Size: 10, Window: 2}, {Size: 50, Window: 10}}},
-		},
-	}
-	for _, tc := range cases {
-		actual := person{}
-		Assign(tc.dataReq).Struct(&actual)
-		Sanitize(tc.dataReq).Params(tc.dataField).ToStruct()
-		assert.Equal(t, tc.want, actual)
-	}
-}
-
 func TestValidateResult(t *testing.T) {
 	type testCase struct {
 		dataReq         *message
@@ -220,6 +77,14 @@ func TestValidateResult(t *testing.T) {
 		},
 		{
 			dataReq: &message{msg: map[string]interface{}{
+				"age": "18A",
+			}},
+			dataField:       "age",
+			wantAbsence:     0,
+			wantFormatError: 1,
+		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
 				"age": "18",
 			}},
 			dataField:       "age",
@@ -231,9 +96,49 @@ func TestValidateResult(t *testing.T) {
 		actual := person{}
 		Assign(tc.dataReq).Struct(&actual)
 		Sanitize(tc.dataReq).Params(tc.dataField).ToInt()
-		formatErrs, absenceErrs := ValidateResult(tc.dataReq)
+		formatErrs, absence := ValidateResult(tc.dataReq)
 		assert.Equal(t, tc.wantFormatError, len(formatErrs))
-		assert.Equal(t, tc.wantAbsence, len(absenceErrs))
+		assert.Equal(t, tc.wantAbsence, len(absence))
+	}
+}
+
+func TestValidateError(t *testing.T) {
+	type testCase struct {
+		dataReq   *message
+		dataField string
+		wantError error
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"age": "18",
+			}},
+			dataField: "score",
+			wantError: NotExistError{},
+		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"age": "18A",
+			}},
+			dataField: "age",
+			wantError: WrongTypeError{},
+		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"age": "18",
+			}},
+			dataField: "age",
+			wantError: nil,
+		},
+	}
+	for _, tc := range cases {
+		actual := person{}
+		Assign(tc.dataReq).Struct(&actual)
+		Sanitize(tc.dataReq).Params(tc.dataField).ToInt()
+		errs, _ := ValidateResult(tc.dataReq)
+		if len(errs) > 0 {
+			assert.True(t, reflect.TypeOf(errs[0]).AssignableTo(reflect.TypeOf(tc.wantError)))
+		}
 	}
 }
 
@@ -258,13 +163,13 @@ func TestValidateClear(t *testing.T) {
 	}
 	for _, tc := range cases {
 		Check(tc.dataReq).Params(tc.dataField1).IsExist()
-		formatErrs, absenceErrs := ValidateResult(tc.dataReq)
+		formatErrs, absence := ValidateResult(tc.dataReq)
 		assert.Equal(t, tc.wantFormatError, len(formatErrs))
-		assert.Equal(t, tc.wantAbsence, len(absenceErrs))
+		assert.Equal(t, tc.wantAbsence, len(absence))
 		Check(tc.dataReq).Params(tc.dataField2).IsExist()
-		formatErrs, absenceErrs = ValidateResult(tc.dataReq)
+		formatErrs, absence = ValidateResult(tc.dataReq)
 		assert.Equal(t, 0, len(formatErrs))
-		assert.Equal(t, 0, len(absenceErrs))
+		assert.Equal(t, 0, len(absence))
 	}
 }
 
@@ -290,11 +195,11 @@ func TestValidateOptional(t *testing.T) {
 		actual := person{}
 		Assign(tc.dataReq).Struct(&actual)
 		Sanitize(tc.dataReq).Optional().Params(tc.dataField).ToInt()
-		formatErrs, absenceErrs := ValidateResult(tc.dataReq)
+		formatErrs, absence := ValidateResult(tc.dataReq)
 		assert.Equal(t, tc.wantFormatError, len(formatErrs))
-		assert.Equal(t, tc.wantAbsence, len(absenceErrs))
+		assert.Equal(t, tc.wantAbsence, len(absence))
 		if len(formatErrs) > 0 {
-			assert.Equal(t, tc.wantIsExistErr, formatErrs[0].(Error).IsNotExist())
+			// assert.Equal(t, tc.wantIsExistErr, formatErrs[0].(Error).IsNotExist())
 		}
 	}
 }

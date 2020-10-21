@@ -1,26 +1,35 @@
 package validator
 
-const (
-	errWrongType = iota
-	errNotExist
-)
-
-// Error is error type of router
-type Error struct {
+type basicError struct {
 	message string
-	errno   int
 }
 
-func (e Error) Error() string {
+func (e basicError) Error() string {
 	return e.message
 }
 
-// IsWrongType means type of val is wrong
-func (e Error) IsWrongType() bool {
-	return e.errno == errWrongType
+// WrongTypeError means message format is wrong
+type WrongTypeError struct {
+	basicError
 }
 
-// IsNotExist means val doesn't exist
-func (e Error) IsNotExist() bool {
-	return e.errno == errNotExist
+func newWrongTypeError(msg string) WrongTypeError {
+	return WrongTypeError{
+		basicError: basicError{
+			message: msg,
+		},
+	}
+}
+
+// NotExistError means parameter do not exist
+type NotExistError struct {
+	basicError
+}
+
+func newNotExistError(msg string) NotExistError {
+	return NotExistError{
+		basicError: basicError{
+			message: msg,
+		},
+	}
 }

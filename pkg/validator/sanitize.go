@@ -2,7 +2,6 @@ package validator
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -111,20 +110,35 @@ func (v *SanitizeType) toValue(dataType int) *SanitizeType {
 		case intType:
 			valInstance, err = strconv.Atoi(val)
 			field.Set(reflect.ValueOf(valInstance))
+			if err != nil {
+				err = newWrongTypeError("message is not int")
+			}
 		case uint32Type:
 			var uint32Instance uint64
 			uint32Instance, err = strconv.ParseUint(val, 10, 32)
 			valInstance = uint32(uint32Instance)
 			field.Set(reflect.ValueOf(valInstance))
+			if err != nil {
+				err = newWrongTypeError("message is not int32")
+			}
 		case float64Type:
 			valInstance, err = strconv.ParseFloat(val, 64)
 			field.Set(reflect.ValueOf(valInstance))
+			if err != nil {
+				err = newWrongTypeError("message is not float")
+			}
 		case boolType:
 			valInstance, err = strconv.ParseBool(val)
 			field.Set(reflect.ValueOf(valInstance))
+			if err != nil {
+				err = newWrongTypeError("message is not bool")
+			}
 		case objectType:
 			varAddr := field.Addr().Interface()
 			err = json.Unmarshal([]byte(val), varAddr)
+			if err != nil {
+				err = newWrongTypeError("message is not json or string")
+			}
 		}
 		v.handleErrors(err)
 	}
@@ -167,8 +181,5 @@ func (v *SanitizeType) getField() reflect.Value {
 }
 
 func (v *SanitizeType) getAbsenceError() error {
-	return Error{
-		message: fmt.Sprintf(v.param + " don't exist!"),
-		errno:   errNotExist,
-	}
+	return newNotExistError(v.param + " don't exist!")
 }
