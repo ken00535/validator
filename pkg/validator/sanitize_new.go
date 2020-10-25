@@ -69,6 +69,12 @@ func (v *SanitizeType) ToStringNew(out interface{}) *SanitizeType {
 	return v
 }
 
+// ToStructNew sanitize field to struct
+func (v *SanitizeType) ToStructNew(out interface{}) *SanitizeType {
+	v.toValueNew(out, objectType)
+	return v
+}
+
 func (v *SanitizeType) toValueNew(out interface{}, dataType int) *SanitizeType {
 	val, exist := v.handleAbsence()
 	if exist {

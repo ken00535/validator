@@ -105,55 +105,53 @@ func TestSanitizeObjectNew(t *testing.T) {
 	}
 }
 
-// func TestSanitizeStruct(t *testing.T) {
-// 	type testCase struct {
-// 		dataReq   *message
-// 		dataField string
-// 		want      person
-// 	}
-// 	cases := []testCase{
-// 		{
-// 			dataReq: &message{msg: map[string]interface{}{
-// 				"leg": `{"number": 2}`,
-// 			}},
-// 			dataField: "leg",
-// 			want:      person{Leg: leg{Number: 2}},
-// 		},
-// 	}
-// 	for _, tc := range cases {
-// 		actual := person{}
-// 		Assign(tc.dataReq).Struct(&actual)
-// 		Sanitize(tc.dataReq).Params(tc.dataField).ToStruct()
-// 		assert.Equal(t, tc.want, actual)
-// 	}
-// }
+func TestSanitizeStructNew(t *testing.T) {
+	type testCase struct {
+		dataReq   *message
+		dataField string
+		want      person
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"leg": `{"number": 2}`,
+			}},
+			dataField: "leg",
+			want:      person{Leg: leg{Number: 2}},
+		},
+	}
+	for _, tc := range cases {
+		actual := person{}
+		SanitizeNew(tc.dataReq).Params(tc.dataField).ToStructNew(&actual)
+		assert.Equal(t, tc.want, actual)
+	}
+}
 
-// func TestSanitizeSlice(t *testing.T) {
-// 	type testCase struct {
-// 		dataReq   *message
-// 		dataField string
-// 		want      person
-// 	}
-// 	cases := []testCase{
-// 		{
-// 			dataReq: &message{msg: map[string]interface{}{
-// 				"parent": `["Mary", "Peter"]`,
-// 			}},
-// 			dataField: "parent",
-// 			want:      person{Parent: []string{"Mary", "Peter"}},
-// 		},
-// 		{
-// 			dataReq: &message{msg: map[string]interface{}{
-// 				"houses": `[{"size": 10, "win": 2}, {"size": 50, "win": 10}]`,
-// 			}},
-// 			dataField: "houses",
-// 			want:      person{Houses: []house{{Size: 10, Window: 2}, {Size: 50, Window: 10}}},
-// 		},
-// 	}
-// 	for _, tc := range cases {
-// 		actual := person{}
-// 		Assign(tc.dataReq).Struct(&actual)
-// 		Sanitize(tc.dataReq).Params(tc.dataField).ToStruct()
-// 		assert.Equal(t, tc.want, actual)
-// 	}
-// }
+func TestSanitizeSliceNew(t *testing.T) {
+	type testCase struct {
+		dataReq   *message
+		dataField string
+		want      person
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"parent": `["Mary", "Peter"]`,
+			}},
+			dataField: "parent",
+			want:      person{Parent: []string{"Mary", "Peter"}},
+		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"houses": `[{"size": 10, "win": 2}, {"size": 50, "win": 10}]`,
+			}},
+			dataField: "houses",
+			want:      person{Houses: []house{{Size: 10, Window: 2}, {Size: 50, Window: 10}}},
+		},
+	}
+	for _, tc := range cases {
+		actual := person{}
+		SanitizeNew(tc.dataReq).Params(tc.dataField).ToStructNew(&actual)
+		assert.Equal(t, tc.want, actual)
+	}
+}
