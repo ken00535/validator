@@ -16,8 +16,15 @@ type SanitizeType struct {
 
 // Sanitize return a sanitize type to following operations
 func Sanitize(payload Payload) *SanitizeType {
-	var errorList []error
 	cache := payload.GetCache()
+	if cache == nil {
+		cache = make(map[string]interface{})
+		payload.SetCache(cache)
+	}
+	cache[contextKey] = make(map[string]interface{})
+
+	var errorList []error
+	cache = payload.GetCache()
 	if cache[contextKey].(map[string]interface{})[errorsKey] != nil {
 		errorList = cache[contextKey].(map[string]interface{})[errorsKey].([]error)
 	}
@@ -38,6 +45,48 @@ func Sanitize(payload Payload) *SanitizeType {
 	return ret
 }
 
+// ToInt sanitize field to int
+func (v *SanitizeType) ToInt(out interface{}) *SanitizeType {
+	v.toValue(out, intType)
+	return v
+}
+
+// ToUint32 sanitize field to uint32
+func (v *SanitizeType) ToUint32(out interface{}) *SanitizeType {
+	v.toValue(out, uint32Type)
+	return v
+}
+
+// ToBool sanitize field to bool
+func (v *SanitizeType) ToBool(out interface{}) *SanitizeType {
+	v.toValue(out, boolType)
+	return v
+}
+
+// ToFloat64 sanitize field to float64
+func (v *SanitizeType) ToFloat64(out interface{}) *SanitizeType {
+	v.toValue(out, float64Type)
+	return v
+}
+
+// ToObject sanitize field to object
+func (v *SanitizeType) ToObject(out interface{}) *SanitizeType {
+	v.toValue(out, objectType)
+	return v
+}
+
+// ToString sanitize field to string
+func (v *SanitizeType) ToString(out interface{}) *SanitizeType {
+	v.toValue(out, objectType)
+	return v
+}
+
+// ToStruct sanitize field to struct
+func (v *SanitizeType) ToStruct(out interface{}) *SanitizeType {
+	v.toValue(out, objectType)
+	return v
+}
+
 // Params tag the param that will be sanitized
 func (v *SanitizeType) Params(param string) *SanitizeType {
 	v.param = param
@@ -56,56 +105,14 @@ func (v *SanitizeType) Trim(str string) *SanitizeType {
 	return v
 }
 
-// ToInt sanitize field to int
-func (v *SanitizeType) ToInt() *SanitizeType {
-	v.toValue(intType)
-	return v
-}
-
-// ToUint32 sanitize field to uint32
-func (v *SanitizeType) ToUint32() *SanitizeType {
-	v.toValue(uint32Type)
-	return v
-}
-
-// ToFloat64 sanitize field to float64
-func (v *SanitizeType) ToFloat64() *SanitizeType {
-	v.toValue(float64Type)
-	return v
-}
-
-// ToBool sanitize field to bool
-func (v *SanitizeType) ToBool() *SanitizeType {
-	v.toValue(boolType)
-	return v
-}
-
-// ToObject sanitize field to object
-func (v *SanitizeType) ToObject() *SanitizeType {
-	v.toValue(objectType)
-	return v
-}
-
-// ToStruct sanitize field to struct
-func (v *SanitizeType) ToStruct() *SanitizeType {
-	v.toValue(objectType)
-	return v
-}
-
-// ToString sanitize field to string
-func (v *SanitizeType) ToString() *SanitizeType {
-	v.toValue(objectType)
-	return v
-}
-
-func (v *SanitizeType) toValue(dataType int) *SanitizeType {
+func (v *SanitizeType) toValue(out interface{}, dataType int) *SanitizeType {
 	val, exist := v.handleAbsence()
 	if exist {
 		if v.cutset != "" {
 			val = strings.Trim(val, v.cutset)
 		}
 		var valInstance interface{}
-		var field = v.getField()
+		var field = v.getField(out)
 		var err error
 		switch dataType {
 		case intType:
@@ -168,11 +175,9 @@ func (v *SanitizeType) handleErrors(err error) {
 	}
 }
 
-func (v *SanitizeType) getField() reflect.Value {
-	cache := v.content.GetCache()
-	target := cache[contextKey].(map[string]interface{})[structKey]
-	targetValue := reflect.ValueOf(target).Elem()
-	targetType := reflect.TypeOf(target).Elem()
+func (v *SanitizeType) getField(out interface{}) reflect.Value {
+	targetValue := reflect.ValueOf(out).Elem()
+	targetType := reflect.TypeOf(out).Elem()
 	for i := 0; i < targetType.NumField(); i++ {
 		if targetType.Field(i).Tag.Get("vld") == v.param {
 			return targetValue.Field(i)

@@ -11,8 +11,7 @@ func TestSanitizeInt(t *testing.T) {
 	payload.msg["age"] = "18"
 	expect := person{Age: 18}
 	actual := person{}
-	Assign(payload).Struct(&actual)
-	Sanitize(payload).Params("age").ToInt()
+	Sanitize(payload).Params("age").ToInt(&actual)
 	assert.Equal(t, expect, actual)
 }
 
@@ -21,8 +20,7 @@ func TestSanitizeBool(t *testing.T) {
 	payload.msg["alive"] = "true"
 	expect := person{IsAlive: true}
 	actual := person{}
-	Assign(payload).Struct(&actual)
-	Sanitize(payload).Params("alive").ToBool()
+	Sanitize(payload).Params("alive").ToBool(&actual)
 	assert.Equal(t, expect, actual)
 }
 
@@ -31,8 +29,7 @@ func TestSanitizeFloat(t *testing.T) {
 	payload.msg["w"] = "64.5"
 	expect := person{Weight: 64.5}
 	actual := person{}
-	Assign(payload).Struct(&actual)
-	Sanitize(payload).Params("w").ToFloat64()
+	Sanitize(payload).Params("w").ToFloat64(&actual)
 	assert.Equal(t, expect, actual)
 }
 
@@ -53,9 +50,7 @@ func TestSanitizeString(t *testing.T) {
 	}
 	for _, tc := range cases {
 		actual := person{}
-		Assign(tc.dataReq).Struct(&actual)
-		Sanitize(tc.dataReq).Params(tc.dataField).ToObject()
-		Sanitize(tc.dataReq).Params(tc.dataField).ToString()
+		Sanitize(tc.dataReq).Params(tc.dataField).ToString(&actual)
 		assert.Equal(t, tc.want, actual)
 	}
 }
@@ -105,8 +100,7 @@ func TestSanitizeObject(t *testing.T) {
 	}
 	for _, tc := range cases {
 		actual := person{}
-		Assign(tc.dataReq).Struct(&actual)
-		Sanitize(tc.dataReq).Params(tc.dataField).ToObject()
+		Sanitize(tc.dataReq).Params(tc.dataField).ToObject(&actual)
 		assert.Equal(t, tc.want, actual)
 	}
 }
@@ -128,8 +122,7 @@ func TestSanitizeStruct(t *testing.T) {
 	}
 	for _, tc := range cases {
 		actual := person{}
-		Assign(tc.dataReq).Struct(&actual)
-		Sanitize(tc.dataReq).Params(tc.dataField).ToStruct()
+		Sanitize(tc.dataReq).Params(tc.dataField).ToStruct(&actual)
 		assert.Equal(t, tc.want, actual)
 	}
 }
@@ -158,8 +151,7 @@ func TestSanitizeSlice(t *testing.T) {
 	}
 	for _, tc := range cases {
 		actual := person{}
-		Assign(tc.dataReq).Struct(&actual)
-		Sanitize(tc.dataReq).Params(tc.dataField).ToStruct()
+		Sanitize(tc.dataReq).Params(tc.dataField).ToStruct(&actual)
 		assert.Equal(t, tc.want, actual)
 	}
 }

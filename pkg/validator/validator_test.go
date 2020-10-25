@@ -94,8 +94,7 @@ func TestValidateResult(t *testing.T) {
 	}
 	for _, tc := range cases {
 		actual := person{}
-		Assign(tc.dataReq).Struct(&actual)
-		Sanitize(tc.dataReq).Params(tc.dataField).ToInt()
+		Sanitize(tc.dataReq).Params(tc.dataField).ToInt(&actual)
 		formatErrs, absence := ValidateResult(tc.dataReq)
 		assert.Equal(t, tc.wantFormatError, len(formatErrs))
 		assert.Equal(t, tc.wantAbsence, len(absence))
@@ -133,8 +132,7 @@ func TestValidateError(t *testing.T) {
 	}
 	for _, tc := range cases {
 		actual := person{}
-		Assign(tc.dataReq).Struct(&actual)
-		Sanitize(tc.dataReq).Params(tc.dataField).ToInt()
+		Sanitize(tc.dataReq).Params(tc.dataField).ToInt(&actual)
 		errs, _ := ValidateResult(tc.dataReq)
 		if len(errs) > 0 {
 			assert.True(t, reflect.TypeOf(errs[0]).AssignableTo(reflect.TypeOf(tc.wantError)))
@@ -193,8 +191,7 @@ func TestValidateOptional(t *testing.T) {
 	}
 	for _, tc := range cases {
 		actual := person{}
-		Assign(tc.dataReq).Struct(&actual)
-		Sanitize(tc.dataReq).Optional().Params(tc.dataField).ToInt()
+		Sanitize(tc.dataReq).Optional().Params(tc.dataField).ToInt(&actual)
 		formatErrs, absence := ValidateResult(tc.dataReq)
 		assert.Equal(t, tc.wantFormatError, len(formatErrs))
 		assert.Equal(t, tc.wantAbsence, len(absence))
@@ -209,8 +206,7 @@ func TestTrim(t *testing.T) {
 	payload.msg["age"] = "!!18"
 	expect := person{Age: 18}
 	actual := person{}
-	Assign(payload).Struct(&actual)
-	Sanitize(payload).Params("age").Trim("!").ToInt()
+	Sanitize(payload).Params("age").Trim("!").ToInt(&actual)
 	assert.Equal(t, expect, actual)
 }
 
