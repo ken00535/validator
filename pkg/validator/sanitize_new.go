@@ -45,6 +45,12 @@ func (v *SanitizeType) ToIntNew(out interface{}) *SanitizeType {
 	return v
 }
 
+// ToBoolNew sanitize field to bool
+func (v *SanitizeType) ToBoolNew(out interface{}) *SanitizeType {
+	v.toValueNew(out, boolType)
+	return v
+}
+
 func (v *SanitizeType) toValueNew(out interface{}, dataType int) *SanitizeType {
 	val, exist := v.handleAbsence()
 	if exist {

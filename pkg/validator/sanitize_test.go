@@ -16,16 +16,6 @@ func TestSanitizeInt(t *testing.T) {
 	assert.Equal(t, expect, actual)
 }
 
-func TestSanitizeIntNew(t *testing.T) {
-	payload := &message{msg: map[string]interface{}{}}
-	payload.msg["age"] = "18"
-	expect := person{Age: 18}
-	actual := person{}
-	Assign(payload)
-	SanitizeNew(payload).Params("age").ToIntNew(&actual)
-	assert.Equal(t, expect, actual)
-}
-
 func TestSanitizeBool(t *testing.T) {
 	payload := &message{msg: map[string]interface{}{}}
 	payload.msg["alive"] = "true"
