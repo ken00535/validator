@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Sanitize return a sanitize type to following operations
+// SanitizeNew return a sanitize type to following operations
 func SanitizeNew(payload Payload) *SanitizeType {
 	cache := payload.GetCache()
 	if cache == nil {
@@ -48,6 +48,24 @@ func (v *SanitizeType) ToIntNew(out interface{}) *SanitizeType {
 // ToBoolNew sanitize field to bool
 func (v *SanitizeType) ToBoolNew(out interface{}) *SanitizeType {
 	v.toValueNew(out, boolType)
+	return v
+}
+
+// ToFloat64New sanitize field to float64
+func (v *SanitizeType) ToFloat64New(out interface{}) *SanitizeType {
+	v.toValueNew(out, float64Type)
+	return v
+}
+
+// ToObjectNew sanitize field to object
+func (v *SanitizeType) ToObjectNew(out interface{}) *SanitizeType {
+	v.toValueNew(out, objectType)
+	return v
+}
+
+// ToStringNew sanitize field to string
+func (v *SanitizeType) ToStringNew(out interface{}) *SanitizeType {
+	v.toValueNew(out, objectType)
 	return v
 }
 
@@ -100,8 +118,6 @@ func (v *SanitizeType) toValueNew(out interface{}, dataType int) *SanitizeType {
 }
 
 func (v *SanitizeType) getFieldNew(out interface{}) reflect.Value {
-	// cache := v.content.GetCache()
-	// target := cache[contextKey].(map[string]interface{})[structKey]
 	targetValue := reflect.ValueOf(out).Elem()
 	targetType := reflect.TypeOf(out).Elem()
 	for i := 0; i < targetType.NumField(); i++ {

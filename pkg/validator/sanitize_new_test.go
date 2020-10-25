@@ -6,16 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// func TestSanitizeInt(t *testing.T) {
-// 	payload := &message{msg: map[string]interface{}{}}
-// 	payload.msg["age"] = "18"
-// 	expect := person{Age: 18}
-// 	actual := person{}
-// 	Assign(payload).Struct(&actual)
-// 	Sanitize(payload).Params("age").ToInt()
-// 	assert.Equal(t, expect, actual)
-// }
-
 func TestSanitizeIntNew(t *testing.T) {
 	payload := &message{msg: map[string]interface{}{}}
 	payload.msg["age"] = "18"
@@ -24,16 +14,6 @@ func TestSanitizeIntNew(t *testing.T) {
 	SanitizeNew(payload).Params("age").ToIntNew(&actual)
 	assert.Equal(t, expect, actual)
 }
-
-// func TestSanitizeBool(t *testing.T) {
-// 	payload := &message{msg: map[string]interface{}{}}
-// 	payload.msg["alive"] = "true"
-// 	expect := person{IsAlive: true}
-// 	actual := person{}
-// 	Assign(payload).Struct(&actual)
-// 	Sanitize(payload).Params("alive").ToBool()
-// 	assert.Equal(t, expect, actual)
-// }
 
 func TestSanitizeBoolNew(t *testing.T) {
 	payload := &message{msg: map[string]interface{}{}}
@@ -44,90 +24,86 @@ func TestSanitizeBoolNew(t *testing.T) {
 	assert.Equal(t, expect, actual)
 }
 
-// func TestSanitizeFloat(t *testing.T) {
-// 	payload := &message{msg: map[string]interface{}{}}
-// 	payload.msg["w"] = "64.5"
-// 	expect := person{Weight: 64.5}
-// 	actual := person{}
-// 	Assign(payload).Struct(&actual)
-// 	Sanitize(payload).Params("w").ToFloat64()
-// 	assert.Equal(t, expect, actual)
-// }
+func TestSanitizeFloatNew(t *testing.T) {
+	payload := &message{msg: map[string]interface{}{}}
+	payload.msg["w"] = "64.5"
+	expect := person{Weight: 64.5}
+	actual := person{}
+	SanitizeNew(payload).Params("w").ToFloat64New(&actual)
+	assert.Equal(t, expect, actual)
+}
 
-// func TestSanitizeString(t *testing.T) {
-// 	type testCase struct {
-// 		dataReq   *message
-// 		dataField string
-// 		want      person
-// 	}
-// 	cases := []testCase{
-// 		{
-// 			dataReq: &message{msg: map[string]interface{}{
-// 				"desc": `"hello"`,
-// 			}},
-// 			dataField: "desc",
-// 			want:      person{Description: "hello"},
-// 		},
-// 	}
-// 	for _, tc := range cases {
-// 		actual := person{}
-// 		Assign(tc.dataReq).Struct(&actual)
-// 		Sanitize(tc.dataReq).Params(tc.dataField).ToObject()
-// 		Sanitize(tc.dataReq).Params(tc.dataField).ToString()
-// 		assert.Equal(t, tc.want, actual)
-// 	}
-// }
+func TestSanitizeStringNew(t *testing.T) {
+	type testCase struct {
+		dataReq   *message
+		dataField string
+		want      person
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"desc": `"hello"`,
+			}},
+			dataField: "desc",
+			want:      person{Description: "hello"},
+		},
+	}
+	for _, tc := range cases {
+		actual := person{}
+		SanitizeNew(tc.dataReq).Params(tc.dataField).ToStringNew(&actual)
+		assert.Equal(t, tc.want, actual)
+	}
+}
 
-// func TestSanitizeObject(t *testing.T) {
-// 	type testCase struct {
-// 		dataReq   *message
-// 		dataField string
-// 		want      person
-// 	}
-// 	cases := []testCase{
-// 		{
-// 			dataReq: &message{msg: map[string]interface{}{
-// 				"hand": `{"finger": 5}`,
-// 			}},
-// 			dataField: "hand",
-// 			want:      person{Hand: map[string]interface{}{"finger": float64(5)}},
-// 		},
-// 		{
-// 			dataReq: &message{msg: map[string]interface{}{
-// 				"hand": `{"finger": true}`,
-// 			}},
-// 			dataField: "hand",
-// 			want:      person{Hand: map[string]interface{}{"finger": true}},
-// 		},
-// 		{
-// 			dataReq: &message{msg: map[string]interface{}{
-// 				"hand": `{"finger": "this is my finger"}`,
-// 			}},
-// 			dataField: "hand",
-// 			want:      person{Hand: map[string]interface{}{"finger": "this is my finger"}},
-// 		},
-// 		{
-// 			dataReq: &message{msg: map[string]interface{}{
-// 				"hand": `{"finger": [1,2]}`,
-// 			}},
-// 			dataField: "hand",
-// 			want:      person{Hand: map[string]interface{}{"finger": []interface{}{float64(1), float64(2)}}},
-// 		},
-// 		{
-// 			dataReq: &message{msg: map[string]interface{}{
-// 				"hand": `{"finger": null}`,
-// 			}},
-// 			dataField: "hand",
-// 			want:      person{Hand: map[string]interface{}{"finger": nil}},
-// 		},
-// 	}
-// 	for _, tc := range cases {
-// 		actual := person{}
-// 		Assign(tc.dataReq).Struct(&actual)
-// 		Sanitize(tc.dataReq).Params(tc.dataField).ToObject()
-// 		assert.Equal(t, tc.want, actual)
-// 	}
-// }
+func TestSanitizeObjectNew(t *testing.T) {
+	type testCase struct {
+		dataReq   *message
+		dataField string
+		want      person
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"hand": `{"finger": 5}`,
+			}},
+			dataField: "hand",
+			want:      person{Hand: map[string]interface{}{"finger": float64(5)}},
+		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"hand": `{"finger": true}`,
+			}},
+			dataField: "hand",
+			want:      person{Hand: map[string]interface{}{"finger": true}},
+		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"hand": `{"finger": "this is my finger"}`,
+			}},
+			dataField: "hand",
+			want:      person{Hand: map[string]interface{}{"finger": "this is my finger"}},
+		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"hand": `{"finger": [1,2]}`,
+			}},
+			dataField: "hand",
+			want:      person{Hand: map[string]interface{}{"finger": []interface{}{float64(1), float64(2)}}},
+		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"hand": `{"finger": null}`,
+			}},
+			dataField: "hand",
+			want:      person{Hand: map[string]interface{}{"finger": nil}},
+		},
+	}
+	for _, tc := range cases {
+		actual := person{}
+		SanitizeNew(tc.dataReq).Params(tc.dataField).ToObjectNew(&actual)
+		assert.Equal(t, tc.want, actual)
+	}
+}
 
 // func TestSanitizeStruct(t *testing.T) {
 // 	type testCase struct {
