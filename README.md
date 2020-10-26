@@ -71,9 +71,8 @@ And you can call validator at project
 ```go
 payload := &message{msg: map[string]string{}}
 payload.msg["age"] = "18"
-player := &person{Name: "ken"}
-validator.Assign(payload).Struct(&player)
-validator.Sanitize(payload).Params("age").ToInt()
+player := person{}
+validator.Sanitize(payload).Params("age").ToInt(&player)
 
 fmt.Println(player.age)
 // -> 18

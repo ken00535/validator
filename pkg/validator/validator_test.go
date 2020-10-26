@@ -51,14 +51,6 @@ type person struct {
 	Houses      []house                `vld:"houses"`
 }
 
-func TestStruct(t *testing.T) {
-	payload := &message{}
-	expect := &person{Name: "ken"}
-	Assign(payload).Struct(expect)
-	actual := payload.GetCache()[contextKey].(map[string]interface{})["struct"]
-	assert.Equal(t, expect, actual)
-}
-
 func TestValidateResult(t *testing.T) {
 	type testCase struct {
 		dataReq         *message
