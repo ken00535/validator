@@ -98,6 +98,7 @@ func TestValidateError(t *testing.T) {
 		dataReq   *message
 		dataField string
 		wantError error
+		wantMsg   string
 	}
 	cases := []testCase{
 		{
@@ -106,6 +107,7 @@ func TestValidateError(t *testing.T) {
 			}},
 			dataField: "score",
 			wantError: NotExistError{},
+			wantMsg:   "score",
 		},
 		{
 			dataReq: &message{msg: map[string]interface{}{
@@ -113,6 +115,7 @@ func TestValidateError(t *testing.T) {
 			}},
 			dataField: "age",
 			wantError: WrongTypeError{},
+			wantMsg:   "age",
 		},
 		{
 			dataReq: &message{msg: map[string]interface{}{
@@ -120,6 +123,7 @@ func TestValidateError(t *testing.T) {
 			}},
 			dataField: "age",
 			wantError: nil,
+			wantMsg:   "",
 		},
 	}
 	for _, tc := range cases {
@@ -128,6 +132,7 @@ func TestValidateError(t *testing.T) {
 		errs, _ := ValidateResult(tc.dataReq)
 		if len(errs) > 0 {
 			assert.True(t, reflect.TypeOf(errs[0]).AssignableTo(reflect.TypeOf(tc.wantError)))
+			assert.Contains(t, errs[0].Error(), tc.wantMsg)
 		}
 	}
 }

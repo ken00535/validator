@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -104,40 +105,40 @@ func (v *CheckType) isType(dataType int) *CheckType {
 		switch dataType {
 		case intType:
 			if reflect.TypeOf(val).Kind() != reflect.Int {
-				err = newWrongTypeError("type is not int")
+				err = newWrongTypeError(fmt.Sprintf("field %s type is not int", v.param))
 			}
 		case int32Type:
 			if reflect.TypeOf(val).Kind() != reflect.Int32 {
-				err = newWrongTypeError("type is not int32")
+				err = newWrongTypeError(fmt.Sprintf("field %s type is not int32", v.param))
 			}
 		case int64Type:
 			if reflect.TypeOf(val).Kind() != reflect.Int64 {
-				err = newWrongTypeError("type is not int64")
+				err = newWrongTypeError(fmt.Sprintf("field %s type is not int64", v.param))
 			}
 		case uint32Type:
 			if reflect.TypeOf(val).Kind() != reflect.Uint32 {
-				err = newWrongTypeError("type is not uint32")
+				err = newWrongTypeError(fmt.Sprintf("field %s type is not uint32", v.param))
 			}
 		case uint64Type:
 			if reflect.TypeOf(val).Kind() != reflect.Uint64 {
-				err = newWrongTypeError("type is not uint64")
+				err = newWrongTypeError(fmt.Sprintf("field %s type is not uint64", v.param))
 			}
 		case float64Type:
 			if reflect.TypeOf(val).Kind() != reflect.Float64 {
-				err = newWrongTypeError("type is not float64")
+				err = newWrongTypeError(fmt.Sprintf("field %s type is not float64", v.param))
 			}
 		case boolType:
 			if reflect.TypeOf(val).Kind() != reflect.Bool {
-				err = newWrongTypeError("type is not bool")
+				err = newWrongTypeError(fmt.Sprintf("field %s type is not bool", v.param))
 			}
 		case stringType:
 			if reflect.TypeOf(val).Kind() != reflect.String {
-				err = newWrongTypeError("type is not string")
+				err = newWrongTypeError(fmt.Sprintf("field %s type is not string", v.param))
 			}
 		case bytesType:
 			if reflect.TypeOf(val).Kind() != reflect.Slice ||
 				reflect.TypeOf(val).Elem().Kind() != reflect.Uint8 {
-				err = newWrongTypeError("type is not bytes")
+				err = newWrongTypeError(fmt.Sprintf("field %s type is not bytes", v.param))
 			}
 		}
 		v.handleErrors(err)
