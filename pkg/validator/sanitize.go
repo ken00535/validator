@@ -24,7 +24,9 @@ func Sanitize(payload Payload) *SanitizeType {
 		cache = make(map[string]interface{})
 		payload.SetCache(cache)
 	}
-	cache[contextKey] = make(map[string]interface{})
+	if cache[contextKey] == nil {
+		cache[contextKey] = make(map[string]interface{})
+	}
 
 	var errorList []error
 	cache = payload.GetCache()

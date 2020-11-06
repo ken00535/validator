@@ -172,6 +172,40 @@ func TestValidateClear(t *testing.T) {
 	}
 }
 
+func TestValidateErrorCount(t *testing.T) {
+	type testCase struct {
+		dataReq         *message
+		dataField1      string
+		dataField2      string
+		wantAbsence     int
+		wantFormatError int
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"age": "18",
+			}},
+			dataField1:      "score",
+			dataField2:      "leg",
+			wantAbsence:     2,
+			wantFormatError: 2,
+		},
+	}
+	for _, tc := range cases {
+		Check(tc.dataReq).Params(tc.dataField1).IsExist()
+		Check(tc.dataReq).Params(tc.dataField2).IsExist()
+		formatErrs, absence := ValidateResult(tc.dataReq)
+		assert.Equal(t, tc.wantFormatError, len(formatErrs))
+		assert.Equal(t, tc.wantAbsence, len(absence))
+		person := person{}
+		Sanitize(tc.dataReq).Params(tc.dataField1).ToInt(&person)
+		Sanitize(tc.dataReq).Params(tc.dataField2).ToInt(&person)
+		formatErrs, absence = ValidateResult(tc.dataReq)
+		assert.Equal(t, tc.wantFormatError, len(formatErrs))
+		assert.Equal(t, tc.wantAbsence, len(absence))
+	}
+}
+
 func TestValidateOptional(t *testing.T) {
 	type testCase struct {
 		dataReq         *message
