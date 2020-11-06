@@ -3,15 +3,18 @@ package validator
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // SanitizeType is type to sanitize
 type SanitizeType struct {
 	validatorBase
-	cutset string
+	cutset     string
+	timeFormat string
 }
 
 // Sanitize return a sanitize type to following operations
@@ -87,6 +90,24 @@ func (v *SanitizeType) ToStruct(out interface{}) *SanitizeType {
 	return v
 }
 
+// ToIP sanitize field to ip
+func (v *SanitizeType) ToIP(out interface{}) *SanitizeType {
+	v.toValue(out, ipType)
+	return v
+}
+
+// ToTime sanitize field to time
+func (v *SanitizeType) ToTime(out interface{}) *SanitizeType {
+	v.toValue(out, timeType)
+	return v
+}
+
+// ToLocalTime sanitize field to time
+func (v *SanitizeType) ToLocalTime(out interface{}) *SanitizeType {
+	v.toValue(out, localTimeType)
+	return v
+}
+
 // Params tag the param that will be sanitized
 func (v *SanitizeType) Params(param string) *SanitizeType {
 	v.param = param
@@ -102,6 +123,12 @@ func (v *SanitizeType) Optional() *SanitizeType {
 // Trim the unused part before assign
 func (v *SanitizeType) Trim(str string) *SanitizeType {
 	v.cutset = str
+	return v
+}
+
+// TimeFormat provide time format info to sanitize
+func (v *SanitizeType) TimeFormat(str string) *SanitizeType {
+	v.timeFormat = str
 	return v
 }
 
@@ -146,6 +173,24 @@ func (v *SanitizeType) toValue(out interface{}, dataType int) *SanitizeType {
 			err = json.Unmarshal([]byte(val), varAddr)
 			if err != nil {
 				err = newWrongTypeError(fmt.Sprintf("message %v is not json or string", val))
+			}
+		case ipType:
+			valInstance := net.ParseIP(val)
+			field.Set(reflect.ValueOf(valInstance))
+			if valInstance == nil {
+				err = newWrongTypeError(fmt.Sprintf("message %v is not ip", val))
+			}
+		case timeType:
+			valInstance, err := time.Parse(v.timeFormat, val)
+			field.Set(reflect.ValueOf(valInstance))
+			if err != nil {
+				err = newWrongTypeError(fmt.Sprintf("message %v is not time. parse error: %v", val, err.Error()))
+			}
+		case localTimeType:
+			valInstance, err := time.ParseInLocation(v.timeFormat, val, time.Local)
+			field.Set(reflect.ValueOf(valInstance))
+			if err != nil {
+				err = newWrongTypeError(fmt.Sprintf("message %v is not time. parse error: %v", val, err.Error()))
 			}
 		}
 		v.handleErrors(err)

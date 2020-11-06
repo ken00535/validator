@@ -1,8 +1,10 @@
 package validator
 
 import (
+	"net"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -49,6 +51,8 @@ type person struct {
 	Leg         leg                    `vld:"leg"`
 	Parent      []string               `vld:"parent"`
 	Houses      []house                `vld:"houses"`
+	IP          net.IP                 `vld:"ip"`
+	StartTime   time.Time              `vld:"startTime"`
 }
 
 func TestValidateResult(t *testing.T) {

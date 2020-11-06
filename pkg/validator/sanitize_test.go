@@ -1,7 +1,9 @@
 package validator
 
 import (
+	"net"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -152,6 +154,74 @@ func TestSanitizeSlice(t *testing.T) {
 	for _, tc := range cases {
 		actual := person{}
 		Sanitize(tc.dataReq).Params(tc.dataField).ToStruct(&actual)
+		assert.Equal(t, tc.want, actual)
+	}
+}
+
+func TestSanitizeIP(t *testing.T) {
+	type testCase struct {
+		dataReq   *message
+		dataField string
+		want      person
+	}
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"ip": "127.0.0.1",
+			}},
+			dataField: "ip",
+			want:      person{IP: net.IPv4(127, 0, 0, 1)},
+		},
+	}
+	for _, tc := range cases {
+		actual := person{}
+		Sanitize(tc.dataReq).Params(tc.dataField).ToIP(&actual)
+		assert.Equal(t, tc.want, actual)
+	}
+}
+
+func TestSanitizeLocalTime(t *testing.T) {
+	type testCase struct {
+		dataReq   *message
+		dataField string
+		want      person
+	}
+	timeVal, _ := time.ParseInLocation("2006-01-02 15:04:05", "2020-11-06 16:19:23", time.Local)
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"startTime": "2020-11-06 16:19:23",
+			}},
+			dataField: "startTime",
+			want:      person{StartTime: timeVal},
+		},
+	}
+	for _, tc := range cases {
+		actual := person{}
+		Sanitize(tc.dataReq).Params(tc.dataField).TimeFormat("2006-01-02 15:04:05").ToLocalTime(&actual)
+		assert.Equal(t, tc.want, actual)
+	}
+}
+
+func TestSanitizeTime(t *testing.T) {
+	type testCase struct {
+		dataReq   *message
+		dataField string
+		want      person
+	}
+	timeVal, _ := time.Parse("2006-01-02 15:04:05", "2020-11-06 16:19:23")
+	cases := []testCase{
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"startTime": "2020-11-06 16:19:23",
+			}},
+			dataField: "startTime",
+			want:      person{StartTime: timeVal},
+		},
+	}
+	for _, tc := range cases {
+		actual := person{}
+		Sanitize(tc.dataReq).Params(tc.dataField).TimeFormat("2006-01-02 15:04:05").ToTime(&actual)
 		assert.Equal(t, tc.want, actual)
 	}
 }

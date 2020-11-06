@@ -22,6 +22,9 @@ const (
 	objectType
 	stringType
 	bytesType
+	ipType
+	timeType
+	localTimeType
 )
 
 // Payload is payload of message, it will store some info of validator, so you have to
