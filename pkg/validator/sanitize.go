@@ -145,7 +145,7 @@ func (v *SanitizeType) toValue(out interface{}, dataType int) *SanitizeType {
 		var err error
 		switch dataType {
 		case intType:
-			valInstance, err := strconv.Atoi(val)
+			valInstance, err = strconv.Atoi(val)
 			if err != nil {
 				err = newWrongTypeError(fmt.Sprintf("message %v is not int", val))
 			} else {
@@ -181,20 +181,20 @@ func (v *SanitizeType) toValue(out interface{}, dataType int) *SanitizeType {
 				err = newWrongTypeError(fmt.Sprintf("message %v is not json or string", val))
 			}
 		case ipType:
-			valInstance := net.ParseIP(val)
+			valInstance = net.ParseIP(val)
 			field.Set(reflect.ValueOf(valInstance))
 			if valInstance == nil {
 				err = newWrongTypeError(fmt.Sprintf("message %v is not ip", val))
 			}
 		case timeType:
-			valInstance, err := time.Parse(v.timeFormat, val)
+			valInstance, err = time.Parse(v.timeFormat, val)
 			if err != nil {
 				err = newWrongTypeError(fmt.Sprintf("message %v is not time. parse error: %v", val, err.Error()))
 			} else {
 				setField(field, valInstance)
 			}
 		case localTimeType:
-			valInstance, err := time.ParseInLocation(v.timeFormat, val, time.Local)
+			valInstance, err = time.ParseInLocation(v.timeFormat, val, time.Local)
 			if err != nil {
 				err = newWrongTypeError(fmt.Sprintf("message %v is not time. parse error: %v", val, err.Error()))
 			} else {
