@@ -39,7 +39,8 @@ func TestCheckExist(t *testing.T) {
 		assert.Equal(t, tc.wantFormatError, len(formatErrs))
 		assert.Equal(t, tc.wantAbsence, len(absence))
 		if len(formatErrs) > 0 {
-			// assert.Equal(t, tc.wantIsExistErr, formatErrs[0].(Error).IsNotExist())
+			_, ok := formatErrs[0].(NotExistError)
+			assert.Equal(t, tc.wantIsExistErr, ok)
 		}
 	}
 }
