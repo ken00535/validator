@@ -39,10 +39,11 @@ type house struct {
 	Window int `json:"win"`
 }
 
-type person struct {
+type testStruct struct {
 	Name        string                 `vld:"name"`
 	Gender      string                 `vld:"gender"`
 	Age         int                    `vld:"age"`
+	HP          *int                   `vld:"hp"`
 	Score       int                    `vld:"score"`
 	Weight      float64                `vld:"w"`
 	IsAlive     bool                   `vld:"alive"`
@@ -53,6 +54,7 @@ type person struct {
 	Houses      []house                `vld:"houses"`
 	IP          net.IP                 `vld:"ip"`
 	StartTime   time.Time              `vld:"startTime"`
+	EndTime     *time.Time             `vld:"endTime"`
 }
 
 func TestValidateResult(t *testing.T) {
@@ -89,7 +91,7 @@ func TestValidateResult(t *testing.T) {
 		},
 	}
 	for _, tc := range cases {
-		actual := person{}
+		actual := testStruct{}
 		Sanitize(tc.dataReq).Params(tc.dataField).ToInt(&actual)
 		formatErrs, absence := ValidateResult(tc.dataReq)
 		assert.Equal(t, tc.wantFormatError, len(formatErrs))
@@ -131,7 +133,7 @@ func TestValidateError(t *testing.T) {
 		},
 	}
 	for _, tc := range cases {
-		actual := person{}
+		actual := testStruct{}
 		Sanitize(tc.dataReq).Params(tc.dataField).ToInt(&actual)
 		errs, _ := ValidateResult(tc.dataReq)
 		if len(errs) > 0 {
@@ -197,7 +199,7 @@ func TestValidateErrorCount(t *testing.T) {
 		formatErrs, absence := ValidateResult(tc.dataReq)
 		assert.Equal(t, tc.wantFormatError, len(formatErrs))
 		assert.Equal(t, tc.wantAbsence, len(absence))
-		person := person{}
+		person := testStruct{}
 		Sanitize(tc.dataReq).Params(tc.dataField1).ToInt(&person)
 		Sanitize(tc.dataReq).Params(tc.dataField2).ToInt(&person)
 		formatErrs, absence = ValidateResult(tc.dataReq)
@@ -225,7 +227,7 @@ func TestValidateOptional(t *testing.T) {
 		},
 	}
 	for _, tc := range cases {
-		actual := person{}
+		actual := testStruct{}
 		Sanitize(tc.dataReq).Optional().Params(tc.dataField).ToInt(&actual)
 		formatErrs, absence := ValidateResult(tc.dataReq)
 		assert.Equal(t, tc.wantFormatError, len(formatErrs))
@@ -239,14 +241,14 @@ func TestValidateOptional(t *testing.T) {
 func TestTrim(t *testing.T) {
 	payload := &message{msg: map[string]interface{}{}}
 	payload.msg["age"] = "!!18"
-	expect := person{Age: 18}
-	actual := person{}
+	expect := testStruct{Age: 18}
+	actual := testStruct{}
 	Sanitize(payload).Params("age").Trim("!").ToInt(&actual)
 	assert.Equal(t, expect, actual)
 }
 
 func TestAnalyze(t *testing.T) {
-	person := person{Name: "ken"}
+	person := testStruct{Name: "ken"}
 	expect := []string{"Name"}
 	tags := []string{"name"}
 	actual := Analyze(person).Fields(tags)

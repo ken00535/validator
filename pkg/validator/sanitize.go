@@ -145,30 +145,34 @@ func (v *SanitizeType) toValue(out interface{}, dataType int) *SanitizeType {
 		var err error
 		switch dataType {
 		case intType:
-			valInstance, err = strconv.Atoi(val)
-			field.Set(reflect.ValueOf(valInstance))
+			valInstance, err := strconv.Atoi(val)
 			if err != nil {
 				err = newWrongTypeError(fmt.Sprintf("message %v is not int", val))
+			} else {
+				setField(field, valInstance)
 			}
 		case uint32Type:
 			var uint32Instance uint64
 			uint32Instance, err = strconv.ParseUint(val, 10, 32)
 			valInstance = uint32(uint32Instance)
-			field.Set(reflect.ValueOf(valInstance))
 			if err != nil {
 				err = newWrongTypeError(fmt.Sprintf("message %v is not int32", val))
+			} else {
+				setField(field, valInstance)
 			}
 		case float64Type:
 			valInstance, err = strconv.ParseFloat(val, 64)
-			field.Set(reflect.ValueOf(valInstance))
 			if err != nil {
 				err = newWrongTypeError(fmt.Sprintf("message %v is not float", val))
+			} else {
+				setField(field, valInstance)
 			}
 		case boolType:
 			valInstance, err = strconv.ParseBool(val)
-			field.Set(reflect.ValueOf(valInstance))
 			if err != nil {
 				err = newWrongTypeError(fmt.Sprintf("message %v is not bool", val))
+			} else {
+				setField(field, valInstance)
 			}
 		case objectType:
 			varAddr := field.Addr().Interface()
@@ -184,15 +188,17 @@ func (v *SanitizeType) toValue(out interface{}, dataType int) *SanitizeType {
 			}
 		case timeType:
 			valInstance, err := time.Parse(v.timeFormat, val)
-			field.Set(reflect.ValueOf(valInstance))
 			if err != nil {
 				err = newWrongTypeError(fmt.Sprintf("message %v is not time. parse error: %v", val, err.Error()))
+			} else {
+				setField(field, valInstance)
 			}
 		case localTimeType:
 			valInstance, err := time.ParseInLocation(v.timeFormat, val, time.Local)
-			field.Set(reflect.ValueOf(valInstance))
 			if err != nil {
 				err = newWrongTypeError(fmt.Sprintf("message %v is not time. parse error: %v", val, err.Error()))
+			} else {
+				setField(field, valInstance)
 			}
 		}
 		v.handleErrors(err)
@@ -235,4 +241,28 @@ func (v *SanitizeType) getField(out interface{}) reflect.Value {
 
 func (v *SanitizeType) getAbsenceError() error {
 	return newNotExistError(v.param + " don't exist!")
+}
+
+func setField(field reflect.Value, val interface{}) {
+	if field.Kind() == reflect.Ptr {
+		switch val.(type) {
+		case int:
+			val := val.(int)
+			field.Set(reflect.ValueOf(&val))
+		case uint32:
+			val := val.(uint32)
+			field.Set(reflect.ValueOf(&val))
+		case float64:
+			val := val.(float64)
+			field.Set(reflect.ValueOf(&val))
+		case bool:
+			val := val.(bool)
+			field.Set(reflect.ValueOf(&val))
+		case time.Time:
+			val := val.(time.Time)
+			field.Set(reflect.ValueOf(&val))
+		}
+	} else {
+		field.Set(reflect.ValueOf(val))
+	}
 }
