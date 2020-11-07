@@ -182,9 +182,10 @@ func (v *SanitizeType) toValue(out interface{}, dataType int) *SanitizeType {
 			}
 		case ipType:
 			valInstance = net.ParseIP(val)
-			field.Set(reflect.ValueOf(valInstance))
 			if valInstance == nil {
 				err = newWrongTypeError(fmt.Sprintf("message %v is not ip", val))
+			} else {
+				setField(field, valInstance)
 			}
 		case timeType:
 			valInstance, err = time.Parse(v.timeFormat, val)
@@ -260,6 +261,9 @@ func setField(field reflect.Value, val interface{}) {
 			field.Set(reflect.ValueOf(&val))
 		case time.Time:
 			val := val.(time.Time)
+			field.Set(reflect.ValueOf(&val))
+		case net.IP:
+			val := val.(net.IP)
 			field.Set(reflect.ValueOf(&val))
 		}
 	} else {

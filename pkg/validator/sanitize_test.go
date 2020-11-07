@@ -69,6 +69,7 @@ func TestSanitizeString(t *testing.T) {
 		dataField string
 		want      testStruct
 	}
+	strPtr := "hello"
 	cases := []testCase{
 		{
 			dataReq: &message{msg: map[string]interface{}{
@@ -76,6 +77,20 @@ func TestSanitizeString(t *testing.T) {
 			}},
 			dataField: "desc",
 			want:      testStruct{Description: "hello"},
+		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"strptr": `"hello"`,
+			}},
+			dataField: "strptr",
+			want:      testStruct{StrPtr: &strPtr},
+		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"null": `"hello"`,
+			}},
+			dataField: "strptr",
+			want:      testStruct{StrPtr: nil},
 		},
 	}
 	for _, tc := range cases {
@@ -192,6 +207,7 @@ func TestSanitizeIP(t *testing.T) {
 		dataField string
 		want      testStruct
 	}
+	ipPtr := net.IPv4(127, 0, 0, 1)
 	cases := []testCase{
 		{
 			dataReq: &message{msg: map[string]interface{}{
@@ -199,6 +215,20 @@ func TestSanitizeIP(t *testing.T) {
 			}},
 			dataField: "ip",
 			want:      testStruct{IP: net.IPv4(127, 0, 0, 1)},
+		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"ipPtr": "127.0.0.1",
+			}},
+			dataField: "ipPtr",
+			want:      testStruct{IPPtr: &ipPtr},
+		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"null": "127.0.0.1",
+			}},
+			dataField: "ipPtr",
+			want:      testStruct{IPPtr: nil},
 		},
 	}
 	for _, tc := range cases {

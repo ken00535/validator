@@ -42,6 +42,7 @@ type house struct {
 type testStruct struct {
 	Name        string                 `vld:"name"`
 	Gender      string                 `vld:"gender"`
+	StrPtr      *string                `vld:"strptr"`
 	Age         int                    `vld:"age"`
 	HP          *int                   `vld:"hp"`
 	Score       int                    `vld:"score"`
@@ -53,6 +54,7 @@ type testStruct struct {
 	Parent      []string               `vld:"parent"`
 	Houses      []house                `vld:"houses"`
 	IP          net.IP                 `vld:"ip"`
+	IPPtr       *net.IP                `vld:"ipPtr"`
 	StartTime   time.Time              `vld:"startTime"`
 	EndTime     *time.Time             `vld:"endTime"`
 }
@@ -65,14 +67,14 @@ func TestValidateResult(t *testing.T) {
 		wantFormatError int
 	}
 	cases := []testCase{
-		// {
-		// 	dataReq: &message{msg: map[string]interface{}{
-		// 		"age": "18",
-		// 	}},
-		// 	dataField:       "score",
-		// 	wantAbsence:     1,
-		// 	wantFormatError: 1,
-		// },
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"age": "18",
+			}},
+			dataField:       "score",
+			wantAbsence:     1,
+			wantFormatError: 1,
+		},
 		{
 			dataReq: &message{msg: map[string]interface{}{
 				"age": "18A",
@@ -224,17 +226,15 @@ func TestValidateOptional(t *testing.T) {
 			dataField:       "score",
 			wantAbsence:     1,
 			wantFormatError: 0,
+			wantIsExistErr:  true,
 		},
 	}
 	for _, tc := range cases {
 		actual := testStruct{}
 		Sanitize(tc.dataReq).Optional().Params(tc.dataField).ToInt(&actual)
-		formatErrs, absence := ValidateResult(tc.dataReq)
-		assert.Equal(t, tc.wantFormatError, len(formatErrs))
+		errs, absence := ValidateResult(tc.dataReq)
+		assert.Equal(t, tc.wantFormatError, len(errs))
 		assert.Equal(t, tc.wantAbsence, len(absence))
-		if len(formatErrs) > 0 {
-			// assert.Equal(t, tc.wantIsExistErr, formatErrs[0].(Error).IsNotExist())
-		}
 	}
 }
 
