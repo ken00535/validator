@@ -37,6 +37,13 @@ func TestSanitizeInt(t *testing.T) {
 			dataField: "hp",
 			want:      testStruct{HP: &hp},
 		},
+		{
+			dataReq: &message{msg: map[string]interface{}{
+				"w": "18.1",
+			}},
+			dataField: "w",
+			want:      testStruct{},
+		},
 	}
 	for _, tc := range cases {
 		actual := testStruct{}
